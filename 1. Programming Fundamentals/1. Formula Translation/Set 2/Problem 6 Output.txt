@@ -1,0 +1,9 @@
+Enter a number:0
+Number is =0
+and number is= 0
+After increment 2
+at the end= 2
+Number is =10
+and number is= 10
+After increment 8
+at the end= 8 

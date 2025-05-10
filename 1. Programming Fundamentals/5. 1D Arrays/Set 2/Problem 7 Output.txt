@@ -1,0 +1,5 @@
+Sample Input: Hello my name is Asjad.
+Output: Hello my name is Asj
+
+Sample Input: My name is Asjad.
+Output: My name is Asjad.
