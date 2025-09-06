@@ -21,6 +21,15 @@ struct RideRequest
         fare = f;
         next = nullptr;
     }
+
+    void display()
+    {
+        cout << "Request ID: \t" << requestID << endl;
+        cout << "Customer Name: \t" << customerName << endl;
+        cout << "Pickup: \t" << pickup << endl;
+        cout << "Dropoff: \t" << dropoff << endl;
+        cout << "Fare: \t" << fare << endl;
+    }
 };
 
 // Node structure for Active Rides
@@ -44,6 +53,16 @@ struct ActiveRide
         fare = f;
         next = nullptr;
     }
+
+    void display()
+    {
+        cout << "Ride ID: \t" << rideID << endl;
+        cout << "Customer Name: \t" << customerName << endl;
+        cout << "Driver Name: \t" << driverName << endl;
+        cout << "Pickup: \t" << pickup << endl;
+        cout << "Dropoff: \t" << dropoff << endl;
+        cout << "Fare: \t" << fare << endl;
+    }
 };
 
 // Node structure for Ride History
@@ -57,6 +76,29 @@ struct RideHistory
     float fare;
     string status; // Completed or Canceled
     RideHistory *next;
+
+    RideHistory(int id, string cname, string dname, string p, string d, float f, string s)
+    {
+        rideID = id;
+        customerName = cname;
+        driverName = dname;
+        pickup = p;
+        dropoff = d;
+        fare = f;
+        status = s;
+        next = nullptr;
+    }
+
+    void display()
+    {
+        cout << "Ride ID: \t" << rideID << endl;
+        cout << "Customer Name: \t" << customerName << endl;
+        cout << "Driver Name: \t" << driverName << endl;
+        cout << "Pickup: \t" << pickup << endl;
+        cout << "Dropoff: \t" << dropoff << endl;
+        cout << "Fare: \t" << fare << endl;
+        cout << "Status: \t" << status << endl;
+    }
 };
 
 class RideNowSystem
@@ -133,6 +175,20 @@ class RideNowSystem
 
     void displayRideRequests()
     {
+        cout << endl << "======= Ride Requests: =======" << endl;
+
+        RideRequest *temp = requestHead;
+
+        int i = 1;
+
+        while (temp)
+        {
+            cout << endl << " --- Ride Number " << i++ << " ---" << endl;
+            temp->display();
+            temp = temp->next;
+        }
+
+        cout << endl << "=====================" << endl;
     }
 
     // ========== Active Ride Functions ==========
@@ -198,11 +254,43 @@ class RideNowSystem
         }
     }
 
-    void displayActiveRides();
+    void displayActiveRides()
+    {
+        cout << endl << "======= Active Rides: =======" << endl;
+
+        ActiveRide *temp = activeHead;
+
+        int i = 1;
+
+        while (temp)
+        {
+            cout << endl << " --- Ride Number " << i++ << " ---" << endl;
+            temp->display();
+            temp = temp->next;
+        }
+
+        cout << endl << "=====================" << endl;
+    }
 
     // ========== Ride History Functions ==========
     void completeRide(int id, bool completed);
-    void displayRideHistory();
+    void displayRideHistory()
+    {
+        cout << endl << "======= Ride History: =======" << endl;
+
+        RideHistory *temp = historyHead;
+
+        int i = 1;
+
+        while (temp)
+        {
+            cout << endl << " --- Ride Number " << i++ << " ---" << endl;
+            temp->display();
+            temp = temp->next;
+        }
+
+        cout << endl << "=====================" << endl;
+    }
     void searchRideByCustomer(string cname);
     void calculateTotalRevenue();
 
@@ -221,7 +309,7 @@ int main()
 
     do
     {
-        cout << "\n====== RideNow System Menu ======\n";
+        cout << "\n======= RideNow System Menu =======\n";
         cout << "1. Add Ride Request\n";
         cout << "2. Cancel Ride Request\n";
         cout << "3. Assign Ride to Driver\n";
