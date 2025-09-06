@@ -33,6 +33,17 @@ struct ActiveRide
     string dropoff;
     float fare;
     ActiveRide *next;
+
+    ActiveRide(int id, string cname, string dname, string p, string d, float f)
+    {
+        rideID = id;
+        customerName = cname;
+        driverName = dname;
+        pickup = p;
+        dropoff = d;
+        fare = f;
+        next = nullptr;
+    }
 };
 
 // Node structure for Ride History
@@ -79,13 +90,114 @@ class RideNowSystem
         requestTail = temp;
     }
 
-    void cancelRideRequest(int id);
-    void displayRideRequests()
+    void cancelRideRequest(int id)
     {
+        RideRequest *temp = requestHead;
+        RideRequest *prev = requestHead;
+
+        int i = 0;
+
+        while (temp)
+        {
+            if (temp->requestID == id)
+            {
+                if (i)
+                {
+                    prev->next = temp->next;
+                    delete temp;
+                }
+                else
+                {
+                    requestHead = temp->next;
+                    delete temp;
+                }
+
+                break;
+            }
+
+            temp = temp->next;
+
+            if (i++)
+            {
+                prev = prev->next;
+            }
         }
 
+        if (!prev->next)
+        {
+            requestTail = prev;
+        }
+
+        completeRide(id, 0); // saving it in rides history as 0 = cancelled
+    }
+
+    void displayRideRequests()
+    {
+    }
+
     // ========== Active Ride Functions ==========
-    void assignRideToDriver(int id, string driverName);
+    void assignRideToDriver(int id, string driverName)
+    {
+        RideRequest *temp = requestHead;
+        RideRequest *prev = requestHead;
+
+        int i = 0;
+
+        while (temp)
+        {
+            if (temp->requestID == id)
+            {
+                ActiveRide *activeRideToAdd =
+                    new ActiveRide(id, temp->customerName, driverName, temp->pickup, temp->dropoff, temp->fare);
+
+                if (i)
+                {
+                    if (!activeHead)
+                    {
+                        activeHead = activeTail = activeRideToAdd;
+                    }
+                    else
+                    {
+                        activeTail->next = activeRideToAdd;
+                        activeTail = activeRideToAdd;
+                    }
+
+                    prev->next = temp->next;
+                    delete temp;
+                }
+                else
+                {
+                    if (!activeHead)
+                    {
+                        activeHead = activeTail = activeRideToAdd;
+                    }
+                    else
+                    {
+                        activeTail->next = activeRideToAdd;
+                        activeTail = activeRideToAdd;
+                    }
+
+                    requestHead = temp->next;
+                    delete temp;
+                }
+
+                break;
+            }
+
+            temp = temp->next;
+
+            if (i++)
+            {
+                prev = prev->next;
+            }
+        }
+
+        if (!prev->next)
+        {
+            requestTail = prev;
+        }
+    }
+
     void displayActiveRides();
 
     // ========== Ride History Functions ==========
