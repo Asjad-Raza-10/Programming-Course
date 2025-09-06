@@ -3,28 +3,41 @@
 using namespace std;
 
 // Node structure for Ride Requests
-struct RideRequest {
+struct RideRequest
+{
     int requestID;
     string customerName;
     string pickup;
     string dropoff;
     float fare;
-    RideRequest* next;
+    RideRequest *next;
+
+    RideRequest(int id, string name, string p, string d, float f)
+    {
+        requestID = id;
+        customerName = name;
+        pickup = p;
+        dropoff = d;
+        fare = f;
+        next = nullptr;
+    }
 };
 
 // Node structure for Active Rides
-struct ActiveRide {
+struct ActiveRide
+{
     int rideID;
     string customerName;
     string driverName;
     string pickup;
     string dropoff;
     float fare;
-    ActiveRide* next;
+    ActiveRide *next;
 };
 
 // Node structure for Ride History
-struct RideHistory {
+struct RideHistory
+{
     int rideID;
     string customerName;
     string driverName;
@@ -32,26 +45,44 @@ struct RideHistory {
     string dropoff;
     float fare;
     string status; // Completed or Canceled
-    RideHistory* next;
+    RideHistory *next;
 };
 
-class RideNowSystem {
-private:
-    RideRequest* requestHead;
-    ActiveRide* activeHead;
-    RideHistory* historyHead;
+class RideNowSystem
+{
+  private:
+    RideRequest *requestHead, *requestTail;
+    ActiveRide *activeHead, *activeTail;
+    RideHistory *historyHead, *historyTail;
 
-public:
-    RideNowSystem() {
-        requestHead = nullptr;
-        activeHead = nullptr;
-        historyHead = nullptr;
+  public:
+    RideNowSystem()
+    {
+        requestHead = requestTail = nullptr;
+        activeHead = activeTail = nullptr;
+        historyHead = historyTail = nullptr;
     }
 
     // ========== Ride Request Functions ==========
-    void addRideRequest(int id, string cname, string pickup, string drop, float fare);
+    void addRideRequest(int id, string cname, string pickup, string drop, float fare)
+    {
+        RideRequest *temp = new RideRequest(id, cname, pickup, drop, fare);
+
+        // If List is Empty
+        if (!requestHead)
+        {
+            requestHead = requestTail = temp;
+            return;
+        }
+
+        requestTail->next = temp;
+        requestTail = temp;
+    }
+
     void cancelRideRequest(int id);
-    void displayRideRequests();
+    void displayRideRequests()
+    {
+        }
 
     // ========== Active Ride Functions ==========
     void assignRideToDriver(int id, string driverName);
@@ -71,11 +102,13 @@ public:
     void findLongestRide();
 };
 
-int main() {
+int main()
+{
     RideNowSystem system;
     int choice;
 
-    do {
+    do
+    {
         cout << "\n====== RideNow System Menu ======\n";
         cout << "1. Add Ride Request\n";
         cout << "2. Cancel Ride Request\n";
@@ -95,60 +128,85 @@ int main() {
         cout << "Enter choice: ";
         cin >> choice;
 
-        switch(choice) {
-            case 1: {
-                int id; string cname, pickup, drop; float fare;
-                cout << "Enter ID, Customer Name, Pickup, Drop, Fare: ";
-                cin >> id >> cname >> pickup >> drop >> fare;
-                system.addRideRequest(id, cname, pickup, drop, fare);
-                break;
-            }
-            case 2: {
-                int id;
-                cout << "Enter Ride ID to cancel: ";
-                cin >> id;
-                system.cancelRideRequest(id);
-                break;
-            }
-            case 3: {
-                int id; string dname;
-                cout << "Enter Ride ID and Driver Name: ";
-                cin >> id >> dname;
-                system.assignRideToDriver(id, dname);
-                break;
-            }
-            case 4: {
-                int id; bool completed;
-                cout << "Enter Ride ID and (1 for Completed, 0 for Canceled): ";
-                cin >> id >> completed;
-                system.completeRide(id, completed);
-                break;
-            }
-            case 5: system.displayRideRequests(); break;
-            case 6: system.displayActiveRides(); break;
-            case 7: system.displayRideHistory(); break;
-            case 8: {
-                string cname;
-                cout << "Enter Customer Name: ";
-                cin >> cname;
-                system.searchRideByCustomer(cname);
-                break;
-            }
-            case 9: system.calculateTotalRevenue(); break;
-            case 10: system.sortRideHistoryByFare(); break;
-            case 11: system.reverseRideHistory(); break;
-            case 12: system.detectAndMergeDuplicateRequests(); break;
-            case 13: {
-                string date;
-                cout << "Enter Date (DD/MM/YYYY): ";
-                cin >> date;
-                system.deleteOldRidesByDate(date);
-                break;
-            }
-            case 14: system.findLongestRide(); break;
-            case 15: cout << "Exiting...\n"; break;
-            default: cout << "Invalid choice!\n";
+        switch (choice)
+        {
+        case 1: {
+            int id;
+            string cname, pickup, drop;
+            float fare;
+            cout << "Enter ID, Customer Name, Pickup, Drop, Fare: ";
+            cin >> id >> cname >> pickup >> drop >> fare;
+            system.addRideRequest(id, cname, pickup, drop, fare);
+            break;
         }
-    } while(choice != 15);
+        case 2: {
+            int id;
+            cout << "Enter Ride ID to cancel: ";
+            cin >> id;
+            system.cancelRideRequest(id);
+            break;
+        }
+        case 3: {
+            int id;
+            string dname;
+            cout << "Enter Ride ID and Driver Name: ";
+            cin >> id >> dname;
+            system.assignRideToDriver(id, dname);
+            break;
+        }
+        case 4: {
+            int id;
+            bool completed;
+            cout << "Enter Ride ID and (1 for Completed, 0 for Canceled): ";
+            cin >> id >> completed;
+            system.completeRide(id, completed);
+            break;
+        }
+        case 5:
+            system.displayRideRequests();
+            break;
+        case 6:
+            system.displayActiveRides();
+            break;
+        case 7:
+            system.displayRideHistory();
+            break;
+        case 8: {
+            string cname;
+            cout << "Enter Customer Name: ";
+            cin >> cname;
+            system.searchRideByCustomer(cname);
+            break;
+        }
+        case 9:
+            system.calculateTotalRevenue();
+            break;
+        case 10:
+            system.sortRideHistoryByFare();
+            break;
+        case 11:
+            system.reverseRideHistory();
+            break;
+        case 12:
+            system.detectAndMergeDuplicateRequests();
+            break;
+        case 13: {
+            string date;
+            cout << "Enter Date (DD/MM/YYYY): ";
+            cin >> date;
+            system.deleteOldRidesByDate(date);
+            break;
+        }
+        case 14:
+            system.findLongestRide();
+            break;
+        case 15:
+            cout << "Exiting...\n";
+            break;
+        default:
+            cout << "Invalid choice!\n";
+        }
+    } while (choice != 15);
 
     return 0;
+}
