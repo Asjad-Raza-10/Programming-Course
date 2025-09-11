@@ -40,7 +40,27 @@ class Date
     {
         return (other < *this);
     }
+
+    void display()
+    {
+        cout << "Date (DD-MM-YYYY): " << date << " - " << month << " - " << year << endl;
+        cout << "Time: (HH:MM): " << hours << " : " << minutes << endl;
+    }
 };
+
+void inputDate(int &year, int &month, int &date, int &hour, int &minute)
+{
+    cout << "Enter the Year: ";
+    cin >> year;
+    cout << "Enter the Month: ";
+    cin >> month;
+    cout << "Enter the date: ";
+    cin >> date;
+    cout << "Enter the Time (Hours): ";
+    cin >> hour;
+    cout << "Enter the Time (Minutes): ";
+    cin >> minute;
+}
 
 // Node structure for Ride Requests
 struct RideRequest
@@ -141,6 +161,7 @@ struct RideHistory
         cout << "Dropoff: \t" << dropoff << endl;
         cout << "Fare: \t" << fare << endl;
         cout << "Status: \t" << status << endl;
+        date.display();
     }
 };
 
@@ -342,11 +363,19 @@ class RideNowSystem
     }
 
     // ========== Ride History Functions ==========
-    void completeRide(int id, string cname, string dname, string pickup, string dropoff, float fare, string sts, int y,
-                      int m, int d, int h, int mn)
+    void completeRide(int id, string cn, string dn, string p, string drp, float f, string sts, int y, int m, int d,
+                      int h, int mn)
     {
-        // RideHistory *temp = new RideHistory(id, )
+        RideHistory *temp = new RideHistory(id, cn, dn, p, drp, f, sts, d, m, y, h, mn);
+        if (!historyHead)
+        {
+            historyHead = historyTail = temp;
+        }
+
+        historyTail->next = temp;
+        historyTail = temp;
     }
+
     void displayRideHistory()
     {
         cout << endl << "======= Ride History: =======" << endl;
@@ -422,20 +451,6 @@ string getName()
     return name;
 }
 
-void inputDate(int &year, int &month, int &date, int &hour, int &minute)
-{
-    cout << "Enter the Year: ";
-    cin >> year;
-    cout << "Enter the Month: ";
-    cin >> month;
-    cout << "Enter the date: ";
-    cin >> date;
-    cout << "Enter the Time (Hours): ";
-    cin >> hour;
-    cout << "Enter the Time (Minutes): ";
-    cin >> minute;
-}
-
 int main()
 {
     RideNowSystem system;
@@ -481,13 +496,13 @@ int main()
             system.addRideRequest(id, cname, pickup, drop, fare);
             break;
         }
-        // case 2: {
-        //     int id;
-        //     cout << "Enter Ride ID to cancel: ";
-        //     cin >> id;
-        //     system.cancelRideRequest(id);
-        //     break;
-        // }
+        case 2: {
+            int id;
+            cout << "Enter Ride ID to cancel: ";
+            cin >> id;
+            system.cancelRideRequest(id);
+            break;
+        }
         case 3: {
             int id;
             string dname;
@@ -500,9 +515,8 @@ int main()
         }
         // case 4: {
         //     int id;
-        //     bool completed;
-        //     cout << "Enter Ride ID and (1 for Completed, 0 for Canceled): ";
-        //     cin >> id >> completed;
+        //     cout << "Enter Request ID: ";
+        //     id = getNumInput();
         //     system.completeRide(id, completed);
         //     break;
         // }
