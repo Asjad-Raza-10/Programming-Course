@@ -890,6 +890,12 @@ class RideNowSystem
         RideHistory *temp = historyHead;
         RideHistory *prev = historyHead;
 
+        if (!temp)
+        {
+            cout << endl << "LIST ALREADY EMPTY" << endl;
+            return;
+        }
+
         while (temp)
         {
             if (temp->date < date)
