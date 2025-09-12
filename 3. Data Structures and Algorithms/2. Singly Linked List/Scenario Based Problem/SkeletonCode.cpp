@@ -661,7 +661,41 @@ class RideNowSystem
     }
 
     void detectAndMergeDuplicateRequests();
-    void deleteOldRidesByDate(string date); // Extra challenge
+
+    void deleteOldRidesByDate(Date date)
+    {
+        RideHistory *temp = historyHead;
+        RideHistory *prev = historyHead;
+
+        while (temp)
+        {
+            if (temp->date < date)
+            {
+                if (temp != historyHead)
+                {
+                    prev->next = temp->next;
+                    delete temp;
+                }
+                else
+                {
+                    historyHead = temp->next;
+                    delete temp;
+                }
+
+                break;
+            }
+
+            prev = temp;
+            temp = temp->next;
+        }
+
+        if (!prev->next)
+        {
+            historyTail = prev;
+        }
+
+        cout << endl << "Old Rides deleted. Display Ride History to check the results." << endl;
+    }
 
     void findLongestRide()
     {
@@ -792,13 +826,14 @@ int main()
         // case 12:
         //     system.detectAndMergeDuplicateRequests();
         //     break;
-        // case 13: {
-        //     string date;
-        //     cout << "Enter Date (DD/MM/YYYY): ";
-        //     cin >> date;
-        //     system.deleteOldRidesByDate(date);
-        //     break;
-        // }
+        case 13: {
+            cout << "Input the Date and Time: " << endl;
+            int y, m, d, h, mnt;
+            inputDate(y, m, d, h, mnt);
+            Date date(d, m, y, h, mnt);
+            system.deleteOldRidesByDate(date);
+            break;
+        }
         case 14:
             system.findLongestRide();
             break;
