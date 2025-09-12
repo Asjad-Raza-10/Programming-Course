@@ -28,9 +28,8 @@ void getFloatInput(float &num)
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
 }
 
-string getName()
+void getName(string &name)
 {
-    string name;
     bool valid = false;
 
     while (!valid)
@@ -51,7 +50,6 @@ string getName()
             }
         }
     }
-    return name;
 }
 
 class Date
@@ -519,6 +517,7 @@ class RideNowSystem
 
         cout << endl << "=====================" << endl;
     }
+
     void searchRideByCustomer(string cname)
     {
         cout << endl << "======= Rides taken by " << cname << ": =======" << endl;
@@ -550,7 +549,32 @@ class RideNowSystem
         cout << endl << "=====================" << endl;
     }
 
-    void calculateTotalRevenue();
+    void calculateTotalRevenue()
+    {
+        cout << endl << "======= Total Revenue: =======" << endl;
+
+        RideHistory *temp = historyHead;
+
+        if (!temp)
+        {
+            cout << "\nNO REVENUE AS NO RIDES COMPLETED\n";
+        }
+
+        int sum = 0;
+
+        while (temp)
+        {
+            // cancelled rides arent counted in revenue
+            if (temp->status == "Completed")
+            {
+                sum += temp->fare;
+            }
+            temp = temp->next;
+        }
+
+        cout << endl << "Total: " << sum << endl;
+        cout << endl << "=====================" << endl;
+    }
 
     // ========== Advanced Functionalities ==========
     void sortRideHistoryByFare();
@@ -595,7 +619,7 @@ int main()
             cout << "Enter Request ID: ";
             getNumInput(id);
             cout << "Enter the Customer's Name: ";
-            cname = getName();
+            getName(cname);
             cout << "Enter the Pickup Address: ";
             getline(cin, pickup);
             cout << "Enter the Dropoff Address: ";
@@ -618,7 +642,7 @@ int main()
             cout << "Enter Request ID: ";
             getNumInput(id);
             cout << "Enter the Driver's Name: ";
-            dname = getName();
+            getName(dname);
             system.assignRideToDriver(id, dname);
             break;
         }
@@ -638,16 +662,16 @@ int main()
         case 7:
             system.displayRideHistory();
             break;
-        // case 8: {
-        //     string cname;
-        //     cout << "Enter Customer Name: ";
-        //     cin >> cname;
-        //     system.searchRideByCustomer(cname);
-        //     break;
-        // }
-        // case 9:
-        //     system.calculateTotalRevenue();
-        //     break;
+        case 8: {
+            string cname;
+            cout << "Enter Customer Name: ";
+            getName(cname);
+            system.searchRideByCustomer(cname);
+            break;
+        }
+        case 9:
+            system.calculateTotalRevenue();
+            break;
         // case 10:
         //     system.sortRideHistoryByFare();
         //     break;
