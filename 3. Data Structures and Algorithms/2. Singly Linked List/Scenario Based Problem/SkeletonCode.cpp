@@ -931,12 +931,17 @@ class RideNowSystem
         if (!temp)
         {
             cout << "\nRIDE HISTORY IS EMPTY\n";
+            return;
         }
+
+        bool found = 0;
 
         while (temp)
         {
             if (temp->status == "Completed")
             {
+                found = 1;
+
                 if ((temp->pickup.length() + temp->dropoff.length()) > longest_length)
                 {
                     longest_length = temp->pickup.length() + temp->dropoff.length();
@@ -946,9 +951,40 @@ class RideNowSystem
             temp = temp->next;
         }
 
-        longest->next = nullptr;
-        longest->display();
+        if (found)
+        {
+            longest->next = nullptr;
+            longest->display();
+        }
+        else
+        {
+            cout << endl << "NO COMPLETED RIDE IN THE HISTORY" << endl;
+        }
         cout << endl << "=====================" << endl;
+    }
+
+    ~RideNowSystem()
+    {
+        while (requestHead)
+        {
+            RideRequest *temp = requestHead;
+            requestHead = requestHead->next;
+            delete temp;
+        }
+
+        while (activeHead)
+        {
+            ActiveRide *temp = activeHead;
+            activeHead = activeHead->next;
+            delete temp;
+        }
+
+        while (historyHead)
+        {
+            RideHistory *temp = historyHead;
+            historyHead = historyHead->next;
+            delete temp;
+        }
     }
 };
 
