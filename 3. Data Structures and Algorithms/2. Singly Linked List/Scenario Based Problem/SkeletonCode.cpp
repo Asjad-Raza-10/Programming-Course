@@ -519,7 +519,37 @@ class RideNowSystem
 
         cout << endl << "=====================" << endl;
     }
-    void searchRideByCustomer(string cname);
+    void searchRideByCustomer(string cname)
+    {
+        cout << endl << "======= Rides taken by " << cname << ": =======" << endl;
+
+        RideHistory *temp = historyHead;
+
+        if (!temp)
+        {
+            cout << "\nRIDE HISTORY IS EMPTY\n";
+        }
+
+        int i = 1;
+
+        while (temp)
+        {
+            if (temp->customerName == cname)
+            {
+                cout << endl << " --- Ride Number " << i++ << " ---" << endl;
+                temp->display();
+            }
+            temp = temp->next;
+        }
+
+        if (!i)
+        {
+            cout << "\nNO RIDES TAKEN BY THIS CUSTOMER\n";
+        }
+
+        cout << endl << "=====================" << endl;
+    }
+
     void calculateTotalRevenue();
 
     // ========== Advanced Functionalities ==========
