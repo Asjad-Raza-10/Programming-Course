@@ -586,12 +586,12 @@ class RideNowSystem
 
         bool swapped = 0;
         RideHistory *current = historyHead;
-        RideHistory *last = NULL;
+        RideHistory *last = nullptr;
 
         do
         {
             swapped = 0;
-            RideHistory *prev = NULL;
+            RideHistory *prev = nullptr;
             current = historyHead;
 
             while (current->next != last)
@@ -601,7 +601,7 @@ class RideNowSystem
                     // Swap the nodes
                     RideHistory *next = current->next;
 
-                    if (prev == NULL)
+                    if (!prev)
                     {
                         historyHead = next;
                     }
@@ -660,7 +660,45 @@ class RideNowSystem
         cout << endl << "=====================" << endl;
     }
 
-    void detectAndMergeDuplicateRequests();
+    void detectAndMergeDuplicateRequests()
+    {
+        if (!requestHead || !requestHead->next)
+        {
+            return;
+        }
+
+        RideRequest *main = requestHead;
+
+        while (main)
+        {
+            RideRequest *move = main;
+
+            while (move->next)
+            {
+                if ((main->customerName == move->next->customerName) && (main->pickup == move->next->pickup) &&
+                    (main->dropoff == move->next->dropoff))
+                {
+                    RideRequest *nodeToDelete = move->next;
+                    move->next = nodeToDelete->next;
+                    delete nodeToDelete;
+                }
+                else
+                {
+                    move = move->next;
+                }
+            }
+            main = main->next;
+        }
+
+        RideRequest *temp = requestHead;
+        while (temp && temp->next)
+        {
+            temp = temp->next;
+        }
+        requestTail = temp;
+
+        cout << endl << "Duplicate Rides deleted. Display Ride History to check the results." << endl;
+    }
 
     void deleteOldRidesByDate(Date date)
     {
@@ -823,9 +861,9 @@ int main()
         case 11:
             system.reverseRideHistory();
             break;
-        // case 12:
-        //     system.detectAndMergeDuplicateRequests();
-        //     break;
+        case 12:
+            system.detectAndMergeDuplicateRequests();
+            break;
         case 13: {
             cout << "Input the Date and Time: " << endl;
             int y, m, d, h, mnt;
