@@ -577,7 +577,59 @@ class RideNowSystem
     }
 
     // ========== Advanced Functionalities ==========
-    void sortRideHistoryByFare();
+    void sortRideHistoryByFare()
+    {
+        if (!historyHead || !historyHead->next)
+        {
+            return; // Empty list or single ride
+        }
+
+        bool swapped = 0;
+        RideHistory *current = historyHead;
+        RideHistory *last = NULL;
+
+        do
+        {
+            swapped = 0;
+            RideHistory *prev = NULL;
+            current = historyHead;
+
+            while (current->next != last)
+            {
+                if (current->fare < current->next->fare)
+                {
+                    // Swap the nodes
+                    RideHistory *next = current->next;
+
+                    if (prev == NULL)
+                    {
+                        historyHead = next;
+                    }
+                    else
+                    {
+                        prev->next = next;
+                    }
+
+                    current->next = next->next;
+                    next->next = current;
+
+                    prev = next;
+                    swapped = 1;
+                }
+                else
+                {
+                    prev = current;
+                    current = current->next;
+                }
+            }
+            last = current;
+        } while (swapped);
+
+        // Update tail pointer
+        historyTail = last;
+
+        cout << endl << "Ride History is sorted. Display Ride History to check the results." << endl;
+    }
 
     void reversePrintHistory(RideHistory *temp, int i)
     {
@@ -601,7 +653,7 @@ class RideNowSystem
             cout << "\nNO RIDES HISTORY\n";
         }
 
-        int i = 1;
+        int i = 0;
 
         reversePrintHistory(temp, i);
 
@@ -731,9 +783,9 @@ int main()
         case 9:
             system.calculateTotalRevenue();
             break;
-        // case 10:
-        //     system.sortRideHistoryByFare();
-        //     break;
+        case 10:
+            system.sortRideHistoryByFare();
+            break;
         case 11:
             system.reverseRideHistory();
             break;
