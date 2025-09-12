@@ -36,6 +36,15 @@ void getName(string &name)
     {
         getline(cin, name);
 
+        // Check if name is empty or only contains spaces
+        if (name.empty() || name.find_first_not_of(' ') == string::npos)
+        {
+            cout << "Invalid name! Name cannot be empty." << endl;
+            cout << "Please input the name again: ";
+            valid = false;
+            continue;
+        }
+
         valid = true;
 
         // learned about this form of for loop while learning python, not plagiarism
@@ -49,6 +58,26 @@ void getName(string &name)
                 break;
             }
         }
+    }
+}
+
+void getAddress(string &add)
+{
+    bool valid = false;
+
+    while (!valid)
+    {
+        getline(cin, add);
+
+        // Check if address is empty or only contains spaces
+        if (add.empty() || add.find_first_not_of(' ') == string::npos)
+        {
+            cout << "Invalid address! Address cannot be empty." << endl;
+            cout << "Please input the address again: ";
+            valid = false;
+            continue;
+        }
+        valid = true;
     }
 }
 
@@ -872,9 +901,9 @@ int main()
             cout << "Enter the Customer's Name: ";
             getName(cname);
             cout << "Enter the Pickup Address: ";
-            getline(cin, pickup);
+            getAddress(pickup);
             cout << "Enter the Dropoff Address: ";
-            getline(cin, drop);
+            getAddress(drop);
             cout << "Enter the Fare: ";
             getFloatInput(fare);
             system.addRideRequest(id, cname, pickup, drop, fare);
