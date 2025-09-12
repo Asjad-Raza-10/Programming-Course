@@ -231,6 +231,12 @@ class RideNowSystem
     // ========== Ride Request Functions ==========
     void addRideRequest(int id, string cname, string pickup, string drop, float fare)
     {
+        if (requestIdExists(id))
+        {
+            cout << "The entered ID already exists. Please enter another ID" << endl;
+            return;
+        }
+
         RideRequest *temp = new RideRequest(id, cname, pickup, drop, fare);
 
         // If List is Empty
@@ -270,6 +276,12 @@ class RideNowSystem
     // ========== Active Ride Functions ==========
     void assignRideToDriver(int id, string driverName)
     {
+        if (!requestIdExists(id))
+        {
+            cout << "The entered ID does not exist in the requests list. Try Again!" << endl;
+            return;
+        }
+
         RideRequest *temp = requestHead;
         RideRequest *prev = requestHead;
 
@@ -360,10 +372,60 @@ class RideNowSystem
     }
 
     // ========== Ride History Functions ==========
+
+    bool requestIdExists(int id)
+    {
+        RideRequest *temp = requestHead;
+
+        if (!temp)
+        {
+            return false;
+        }
+
+        while (temp)
+        {
+            if (temp->requestID == id)
+            {
+                return true;
+            }
+            temp = temp->next;
+        }
+
+        return false;
+    }
+
+    bool activeIdExists(int id)
+    {
+        ActiveRide *temp = activeHead;
+
+        if (!temp)
+        {
+            return false;
+        }
+
+        while (temp)
+        {
+            if (temp->rideID == id)
+            {
+                return true;
+            }
+            temp = temp->next;
+        }
+
+        return false;
+    }
+
     void completeRide(int id, bool completed)
     {
+
         if (completed)
         {
+            if (!activeIdExists(id))
+            {
+                cout << "The entered ID does not exist in the active rides list. Try Again!" << endl;
+                return;
+            }
+
             ActiveRide *temp = activeHead;
             ActiveRide *prev = activeHead;
 
@@ -430,6 +492,12 @@ class RideNowSystem
         }
         else
         {
+            if (!requestIdExists(id))
+            {
+                cout << "The entered ID does not exist in the requests list. Try Again!" << endl;
+                return;
+            }
+
             RideRequest *temp = requestHead;
             RideRequest *prev = requestHead;
 
