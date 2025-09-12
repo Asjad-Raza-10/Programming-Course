@@ -578,7 +578,36 @@ class RideNowSystem
 
     // ========== Advanced Functionalities ==========
     void sortRideHistoryByFare();
-    void reverseRideHistory();
+
+    void reversePrintHistory(RideHistory *temp, int i)
+    {
+        if (!temp)
+        {
+            return;
+        }
+        reversePrintHistory(temp->next, ++i);
+        cout << endl << " --- Ride Number " << i << " ---" << endl;
+        temp->display();
+    }
+
+    void reverseRideHistory()
+    {
+        cout << endl << "======= Ride History (Recent First): =======" << endl;
+
+        RideHistory *temp = historyHead;
+
+        if (!temp)
+        {
+            cout << "\nNO RIDES HISTORY\n";
+        }
+
+        int i = 1;
+
+        reversePrintHistory(temp, i);
+
+        cout << endl << "=====================" << endl;
+    }
+
     void detectAndMergeDuplicateRequests();
     void deleteOldRidesByDate(string date); // Extra challenge
     void findLongestRide();
@@ -675,9 +704,9 @@ int main()
         // case 10:
         //     system.sortRideHistoryByFare();
         //     break;
-        // case 11:
-        //     system.reverseRideHistory();
-        //     break;
+        case 11:
+            system.reverseRideHistory();
+            break;
         // case 12:
         //     system.detectAndMergeDuplicateRequests();
         //     break;
