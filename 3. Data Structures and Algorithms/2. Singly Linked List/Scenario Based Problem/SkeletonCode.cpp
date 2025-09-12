@@ -610,7 +610,37 @@ class RideNowSystem
 
     void detectAndMergeDuplicateRequests();
     void deleteOldRidesByDate(string date); // Extra challenge
-    void findLongestRide();
+
+    void findLongestRide()
+    {
+        RideHistory *temp = historyHead;
+        int longest_length = 0;
+        RideHistory *longest = nullptr;
+
+        cout << endl << "======= Longest Ride =======" << endl;
+
+        if (!temp)
+        {
+            cout << "\nRIDE HISTORY IS EMPTY\n";
+        }
+
+        while (temp)
+        {
+            if (temp->status == "Completed")
+            {
+                if ((temp->pickup.length() + temp->dropoff.length()) > longest_length)
+                {
+                    longest_length = temp->pickup.length() + temp->dropoff.length();
+                    longest = temp;
+                }
+            }
+            temp = temp->next;
+        }
+
+        longest->next = nullptr;
+        longest->display();
+        cout << endl << "=====================" << endl;
+    }
 };
 
 int main()
@@ -717,9 +747,9 @@ int main()
         //     system.deleteOldRidesByDate(date);
         //     break;
         // }
-        // case 14:
-        //     system.findLongestRide();
-        //     break;
+        case 14:
+            system.findLongestRide();
+            break;
         case 15:
             cout << "Exiting...\n";
             break;
