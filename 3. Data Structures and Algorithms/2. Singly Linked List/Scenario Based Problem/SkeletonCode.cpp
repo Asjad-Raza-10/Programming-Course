@@ -4,6 +4,56 @@
 
 using namespace std;
 
+// Functions for Input with validation checks
+
+void getNumInput(int &num)
+{
+    while (!(cin >> num) || (num < 0)) // while extraction fails and number is negative
+    {
+        cout << "Invalid input. Please enter a positive integer: ";
+        cin.clear();                                         // clear error flag
+        cin.ignore(numeric_limits<streamsize>::max(), '\n'); // discard invalid input
+    }
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+}
+
+void getFloatInput(float &num)
+{
+    while (!(cin >> num) || (num < 0)) // while extraction fails and number is negative
+    {
+        cout << "Invalid input. Please enter a positive amount: ";
+        cin.clear();                                         // clear error flag
+        cin.ignore(numeric_limits<streamsize>::max(), '\n'); // discard invalid input
+    }
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+}
+
+string getName()
+{
+    string name;
+    bool valid = false;
+
+    while (!valid)
+    {
+        getline(cin, name);
+
+        valid = true;
+
+        // learned about this form of for loop while learning python, not plagiarism
+        for (char c : name)
+        {
+            if (!((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c == ' '))
+            {
+                cout << "Invalid name! Only alphabets and spaces are allowed." << endl;
+                cout << "Please input the name again: ";
+                valid = false;
+                break;
+            }
+        }
+    }
+    return name;
+}
+
 class Date
 {
   private:
@@ -51,15 +101,15 @@ class Date
 void inputDate(int &year, int &month, int &date, int &hour, int &minute)
 {
     cout << "Enter the Year: ";
-    cin >> year;
+    getNumInput(year);
     cout << "Enter the Month: ";
-    cin >> month;
+    getNumInput(month);
     cout << "Enter the date: ";
-    cin >> date;
+    getNumInput(date);
     cout << "Enter the Time (Hours): ";
-    cin >> hour;
+    getNumInput(hour);
     cout << "Enter the Time (Minutes): ";
-    cin >> minute;
+    getNumInput(minute);
 }
 
 // Node structure for Ride Requests
@@ -196,57 +246,6 @@ class RideNowSystem
         requestTail = temp;
     }
 
-    void cancelRideRequest(int id)
-    {
-        RideRequest *temp = requestHead;
-        RideRequest *prev = requestHead;
-
-        // copying the contents of ride request before deleting it, to store it in ride history
-        string cname = temp->customerName;
-        string pickup = temp->pickup;
-        string dropoff = temp->dropoff;
-        float fare = temp->fare;
-
-        int i = 0;
-
-        while (temp)
-        {
-            if (temp->requestID == id)
-            {
-                if (i)
-                {
-                    prev->next = temp->next;
-                    delete temp;
-                }
-                else
-                {
-                    requestHead = temp->next;
-                    delete temp;
-                }
-
-                break;
-            }
-
-            temp = temp->next;
-
-            if (i++)
-            {
-                prev = prev->next;
-            }
-        }
-
-        if (!prev->next)
-        {
-            requestTail = prev;
-        }
-
-        cout << "Enter the date when the ride is cancelled." << endl;
-        int y, m, d, h, mn;
-        inputDate(y, m, d, h, mn);
-        string dname = "NO DRIVER"; // as cancelled ride will not have any driver
-        completeRide(id, cname, dname, pickup, dropoff, fare, "Cancelled", y, m, d, h, mn);
-    }
-
     void displayRideRequests()
     {
         cout << endl << "======= Ride Requests: =======" << endl;
@@ -363,17 +362,139 @@ class RideNowSystem
     }
 
     // ========== Ride History Functions ==========
-    void completeRide(int id, string cn, string dn, string p, string drp, float f, string sts, int y, int m, int d,
-                      int h, int mn)
+    void completeRide(int id, bool completed)
     {
-        RideHistory *temp = new RideHistory(id, cn, dn, p, drp, f, sts, d, m, y, h, mn);
-        if (!historyHead)
+        if (completed)
         {
-            historyHead = historyTail = temp;
-        }
+            ActiveRide *temp = activeHead;
+            ActiveRide *prev = activeHead;
 
-        historyTail->next = temp;
-        historyTail = temp;
+            // copying the contents of active ride before deleting it, to store it in ride history
+            string cname = "";
+            string dname = "";
+            string pickup = "";
+            string dropoff = "";
+            float fare = 0;
+
+            int i = 0;
+
+            while (temp)
+            {
+                if (temp->rideID == id)
+                {
+                    // copying the contents of active ride before deleting it, to store it in ride history
+                    cname = temp->customerName;
+                    dname = temp->driverName;
+                    pickup = temp->pickup;
+                    dropoff = temp->dropoff;
+                    fare = temp->fare;
+
+                    if (i)
+                    {
+                        prev->next = temp->next;
+                        delete temp;
+                    }
+                    else
+                    {
+                        activeHead = temp->next;
+                        delete temp;
+                    }
+
+                    break;
+                }
+
+                temp = temp->next;
+
+                if (i++)
+                {
+                    prev = prev->next;
+                }
+            }
+
+            if (!prev->next)
+            {
+                activeTail = prev;
+            }
+
+            cout << "Enter the date and time when the ride is completed." << endl;
+            int y, m, d, h, mn;
+            inputDate(y, m, d, h, mn);
+
+            RideHistory *temp_2 = new RideHistory(id, cname, dname, pickup, dropoff, fare, "Completed", d, m, y, h, mn);
+            if (!historyHead)
+            {
+                historyHead = historyTail = temp_2;
+                return;
+            }
+
+            historyTail->next = temp_2;
+            historyTail = temp_2;
+        }
+        else
+        {
+            RideRequest *temp = requestHead;
+            RideRequest *prev = requestHead;
+
+            // copying the contents of ride request before deleting it, to store it in ride history
+            string cname = "";
+            string pickup = "";
+            string dropoff = "";
+            float fare = 0;
+
+            int i = 0;
+
+            while (temp)
+            {
+                if (temp->requestID == id)
+                {
+                    // copying the contents of ride request before deleting it, to store it in ride history
+                    cname = temp->customerName;
+                    pickup = temp->pickup;
+                    dropoff = temp->dropoff;
+                    fare = temp->fare;
+
+                    if (i)
+                    {
+                        prev->next = temp->next;
+                        delete temp;
+                    }
+                    else
+                    {
+                        requestHead = temp->next;
+                        delete temp;
+                    }
+
+                    break;
+                }
+
+                temp = temp->next;
+
+                if (i++)
+                {
+                    prev = prev->next;
+                }
+            }
+
+            if (!prev->next)
+            {
+                requestTail = prev;
+            }
+
+            cout << "Enter the date and time when the ride is cancelled." << endl;
+            int y, m, d, h, mn;
+            inputDate(y, m, d, h, mn);
+            string dname = "None"; // as cancelled ride will not have any driver
+
+            RideHistory *temp_2 = new RideHistory(id, cname, dname, pickup, dropoff, fare, "Cancelled", d, m, y, h, mn);
+            if (!historyHead)
+            {
+                historyHead = historyTail = temp_2;
+                return;
+            }
+
+            historyTail->next = temp_2;
+            historyTail = temp_2;
+        }
     }
 
     void displayRideHistory()
@@ -409,48 +530,6 @@ class RideNowSystem
     void findLongestRide();
 };
 
-// Functions for Input with validation checks
-
-int getNumInput()
-{
-    int num;
-    while (!(cin >> num)) // while extraction fails
-    {
-        cout << "Invalid input. Please enter an integer: ";
-        cin.clear();                                         // clear error flag
-        cin.ignore(numeric_limits<streamsize>::max(), '\n'); // discard invalid input
-    }
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-
-    return num;
-}
-
-string getName()
-{
-    string name;
-    bool valid = false;
-
-    while (!valid)
-    {
-        getline(cin, name);
-
-        valid = true;
-
-        // learned about this form of for loop while learning python, not plagiarism
-        for (char c : name)
-        {
-            if (!((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c == ' '))
-            {
-                cout << "Invalid name! Only alphabets and spaces are allowed." << endl;
-                cout << "Please input the name again: ";
-                valid = false;
-                break;
-            }
-        }
-    }
-    return name;
-}
-
 int main()
 {
     RideNowSystem system;
@@ -484,7 +563,7 @@ int main()
             string cname, pickup, drop;
             float fare;
             cout << "Enter Request ID: ";
-            id = getNumInput();
+            getNumInput(id);
             cout << "Enter the Customer's Name: ";
             cname = getName();
             cout << "Enter the Pickup Address: ";
@@ -492,34 +571,34 @@ int main()
             cout << "Enter the Dropoff Address: ";
             getline(cin, drop);
             cout << "Enter the Fare: ";
-            fare = getNumInput();
+            getFloatInput(fare);
             system.addRideRequest(id, cname, pickup, drop, fare);
             break;
         }
         case 2: {
             int id;
             cout << "Enter Ride ID to cancel: ";
-            cin >> id;
-            system.cancelRideRequest(id);
+            getNumInput(id);
+            system.completeRide(id, 0);
             break;
         }
         case 3: {
             int id;
             string dname;
             cout << "Enter Request ID: ";
-            id = getNumInput();
+            getNumInput(id);
             cout << "Enter the Driver's Name: ";
             dname = getName();
             system.assignRideToDriver(id, dname);
             break;
         }
-        // case 4: {
-        //     int id;
-        //     cout << "Enter Request ID: ";
-        //     id = getNumInput();
-        //     system.completeRide(id, completed);
-        //     break;
-        // }
+        case 4: {
+            int id;
+            cout << "Enter Ride ID to complete: ";
+            getNumInput(id);
+            system.completeRide(id, 1);
+            break;
+        }
         case 5:
             system.displayRideRequests();
             break;
