@@ -125,18 +125,106 @@ class Date
     }
 };
 
+// Helper functions for Date Validation
+
+bool isValidYear(int year)
+{
+    if (year < 1 || year > 2025)
+    {
+        cout << "Invalid year. Please enter a year between 1 and 2025: ";
+        return false;
+    }
+    return true;
+}
+
+bool isLeapYear(int year)
+{
+    return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
+}
+
+bool isValidMonth(int month)
+{
+    if (month < 1 || month > 12)
+    {
+        cout << "Invalid month. Please enter a month between 1 and 12: ";
+        return false;
+    }
+    return true;
+}
+
+int getDaysInMonth(int month, int year)
+{
+    int daysInMonth[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+
+    if (month == 2 && isLeapYear(year)) // February in a leap year
+    {
+        return 29;
+    }
+    return daysInMonth[month - 1]; // array is starting from 0 index
+}
+
+bool isValidDate(int date, int month, int year)
+{
+    int maxDays = getDaysInMonth(month, year);
+    if (date < 1 || date > maxDays)
+    {
+        cout << "Invalid date. Please enter a date between 1 and " << maxDays << ": ";
+        return false;
+    }
+    return true;
+}
+
+bool isValidHour(int hour)
+{
+    if (hour < 0 || hour > 23)
+    {
+        cout << "Invalid hour. Please enter an hour between 0 and 23: ";
+        return false;
+    }
+    return true;
+}
+
+bool isValidMinute(int minute)
+{
+    if (minute < 0 || minute > 59)
+    {
+        cout << "Invalid minute. Please enter a minute between 0 and 59: ";
+        return false;
+    }
+    return true;
+}
+
 void inputDate(int &year, int &month, int &date, int &hour, int &minute)
 {
     cout << "Enter the Year: ";
-    getNumInput(year);
+    do
+    {
+        getNumInput(year);
+    } while (!isValidYear(year));
+
     cout << "Enter the Month: ";
-    getNumInput(month);
+    do
+    {
+        getNumInput(month);
+    } while (!isValidMonth(month));
+
     cout << "Enter the date: ";
-    getNumInput(date);
+    do
+    {
+        getNumInput(date);
+    } while (!isValidDate(date, month, year));
+
     cout << "Enter the Time (Hours): ";
-    getNumInput(hour);
+    do
+    {
+        getNumInput(hour);
+    } while (!isValidHour(hour));
+
     cout << "Enter the Time (Minutes): ";
-    getNumInput(minute);
+    do
+    {
+        getNumInput(minute);
+    } while (!isValidMinute(minute));
 }
 
 // Node structure for Ride Requests
