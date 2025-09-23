@@ -811,7 +811,12 @@ class RideNowSystem
         } while (swapped);
 
         // Update tail pointer
-        historyTail = last;
+        current = historyHead;
+        while (current)
+        {
+            current = current->next;
+        }
+        historyTail = current;
 
         cout << endl << "Ride History is sorted. Display Ride History to check the results." << endl;
     }
