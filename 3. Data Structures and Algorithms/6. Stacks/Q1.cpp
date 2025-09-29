@@ -1,30 +1,33 @@
+#include <fstream>
 #include <iostream>
+#include <string>
+
 using namespace std;
 
 template <class T> class Stack
 {
     T *arr;
     int capacity;
-    int top;
+    int current;
 
   public:
     Stack(int n = 5)
     {
-        capacity = 7;
+        capacity = n;
         arr = new T[capacity];
-        top = -1;
+        current = -1;
     }
 
     bool isEmpty()
     {
-        if (top == -1)
+        if (current == -1)
             return true;
         return false;
     }
 
     bool isFull()
     {
-        if (top == capacity - 1)
+        if (current == capacity - 1)
             return true;
         return false;
     }
@@ -37,7 +40,7 @@ template <class T> class Stack
         }
         else
         {
-            arr[++top] = d;
+            arr[++current] = d;
         }
     }
 
@@ -49,7 +52,7 @@ template <class T> class Stack
             return T();
         }
 
-        return arr[top--];
+        return arr[current--];
     }
 
     T top()
@@ -59,12 +62,12 @@ template <class T> class Stack
             cout << "Stack is empty" << endl;
             return T();
         }
-        return arr[top];
+        return arr[current];
     }
 
     void print()
     {
-        for (int i = top; i >= 0; i--)
+        for (int i = current; i >= 0; i--)
         {
             cout << arr[i] << endl;
         }
@@ -73,6 +76,24 @@ template <class T> class Stack
 
 int main()
 {
+    ifstream file(
+        "/Volumes/Data/Portfolio/Github/Programming Course/3. Data Structures and Algorithms/6. Stacks/test.xml");
+    // open the file
+    if (!file.is_open())
+    {
+        cout << "Error: Could not open file!" << endl;
+        return 1;
+    }
 
+    string line;
+    int lineNumber = 0;
+
+    while (getline(file, line)) // read line by line
+    {
+        lineNumber++;
+        cout << "Line " << lineNumber << ": " << line << endl;
+    }
+
+    file.close();
     return 0;
 }
