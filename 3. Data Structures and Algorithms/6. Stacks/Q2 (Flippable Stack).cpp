@@ -7,7 +7,6 @@ template <typename T> class CircularStack
     T *arr;
     int capacity;
     int top;
-    int bottom;
     bool flipped;
 
     bool isFull()
@@ -38,6 +37,8 @@ template <typename T> class CircularStack
         delete[] arr;
         arr = temp;
         capacity = new_capacity;
+
+        cout << endl << endl << "The stack's capacity was increased to double" << endl << endl;
     }
 
     void shrink()
@@ -53,6 +54,8 @@ template <typename T> class CircularStack
         delete[] arr;
         arr = temp;
         capacity = new_capacity;
+
+        cout << endl << endl << "The stack's capacity was decreased to half" << endl << endl;
     }
 
   public:
@@ -61,7 +64,6 @@ template <typename T> class CircularStack
         capacity = s;
         arr = new T[capacity];
         top = -1;
-        bottom = 0;
         flipped = false;
 
         cout << "A stack with capacity " << capacity << " was created" << endl;
@@ -123,7 +125,7 @@ template <typename T> class CircularStack
 
     T pop()
     {
-        T temp();
+        T temp;
 
         if (isEmpty())
         {
