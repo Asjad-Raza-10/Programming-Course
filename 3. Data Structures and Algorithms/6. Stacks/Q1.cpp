@@ -72,6 +72,11 @@ template <class T> class Stack
             cout << arr[i] << endl;
         }
     }
+
+    ~Stack()
+    {
+        delete[] arr;
+    }
 };
 
 int main()
