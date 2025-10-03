@@ -4,84 +4,134 @@
 
 using namespace std;
 
-template <class T> class Stack
+template <typename T> class Stack
 {
-    T *arr;
-    int capacity;
-    int current;
+  private:
+    class Node
+    {
+      public:
+        Node *next;
+        T data;
+
+        Node()
+        {
+            next = nullptr;
+        }
+
+        Node(T d)
+        {
+            next = nullptr;
+            data = d;
+        }
+    };
+
+    Node *front;
+    Node *rear;
 
   public:
-    Stack(int n = 5)
+    Stack()
     {
-        capacity = n;
-        arr = new T[capacity];
-        current = -1;
+        front = rear = nullptr;
     }
 
-    bool isEmpty()
+    Stack(T num)
     {
-        if (current == -1)
-            return true;
-        return false;
-    }
-
-    bool isFull()
-    {
-        if (current == capacity - 1)
-            return true;
-        return false;
+        Node *n = new Node(num);
+        front = rear = n;
     }
 
     void push(T d)
     {
-        if (isFull())
+        Node *n = new Node(d);
+        if (!front)
         {
-            cerr << "Stack is full!" << endl;
+            front = rear = n;
+            return;
         }
-        else
-        {
-            arr[++current] = d;
-        }
+
+        rear->next = n;
+        rear = n;
     }
 
     T pop()
     {
-        if (isEmpty())
+        if (!front)
         {
-            cout << "Stack is empty" << endl;
             return T();
         }
 
-        return arr[current--];
-    }
+        T temp = rear->data;
 
-    T top()
-    {
-        if (isEmpty())
+        if (front == rear)
         {
-            cout << "Stack is empty" << endl;
-            return T();
+            delete front;
+            front = rear = nullptr;
+            return temp;
         }
-        return arr[current];
+
+        Node *move = front;
+        Node *prev = nullptr;
+
+        while (move)
+        {
+            if (!move->next)
+            {
+                delete rear;
+                rear = prev;
+                rear->next = nullptr;
+                break;
+            }
+
+            prev = move;
+            move = move->next;
+        }
+
+        return temp;
     }
 
     void print()
     {
-        for (int i = current; i >= 0; i--)
+        cout << endl << "Stack with Linked List is: ";
+        Node *temp = front;
+
+        cout << temp->data;
+        temp = temp->next;
+
+        while (temp)
         {
-            cout << arr[i] << endl;
+            cout << " <- " << temp->data;
+
+            temp = temp->next;
         }
+
+        cout << endl << endl;
+    }
+
+    bool isEmpty()
+    {
+        return !front;
+    }
+
+    T peek()
+    {
+        return rear->data;
     }
 
     ~Stack()
     {
-        delete[] arr;
+        while (front)
+        {
+            Node *move = front;
+            front = front->next;
+            delete move;
+        }
     }
 };
 
 int main()
 {
     Stack<string> tags;
+    bool allGood = true;
 
     ifstream file(
         "/Volumes/Data/Portfolio/Github/Programming Course/3. Data Structures and Algorithms/6. Stacks/test.xml");
@@ -101,22 +151,26 @@ int main()
     if (line.size() < 2 || line[i++] != '<')
     {
         cerr << "Error: No opening tag for the header" << endl;
+        allGood = false;
     }
 
     if (i >= line.size() || line[i++] != '?')
     {
         cerr << "Error: Header not defined" << endl;
+        allGood = false;
     }
 
     i = line.size() - 1;
     if (line[i] != '>')
     {
         cerr << "Error: No closing tag for the header" << endl;
+        allGood = false;
     }
 
     if (i == 0 || line[i - 1] != '?')
     {
         cerr << "Error: No closing ? for the header" << endl;
+        allGood = false;
     }
 
     // inner string checks
@@ -124,25 +178,70 @@ int main()
     {
         bool openingBracketFound = false;
         bool closingTagFound = false;
+        bool attributeFound = false;
+        bool firstCommaFound = false;
+        bool commentStartFound = false;
+        bool commentCompleted = false;
+        char commaUsed = '\0';
         string tag = "";
-        i = 0;
 
-        while (i < line.size())
+        for (int i = 0; i < line.length(); i++)
         {
             char c = line[i];
-            if (c == '<')
+
+            if (c == '-') // ending of comment
+            {
+                if (commentStartFound)
+                {
+                    if (line[i + 1] == '-' && line[i + 2] == '>')
+                    {
+                        commentStartFound = false;
+                        commentCompleted = true;
+                    }
+                    else
+                    {
+                        cerr << "Invalid closing for comment." << endl;
+                        allGood = false;
+                    }
+                }
+            }
+            else if (c == '<')
             {
                 if (openingBracketFound)
                 {
                     cerr << "Multiple Tags opened before closing the previous one." << endl;
+                    allGood = false;
                 }
                 else
                 {
                     openingBracketFound = true;
                 }
+
+                if (line[i + 1] == '!')
+                {
+                    if (line[i + 2] == '-' && line[i + 3] == '-')
+                    {
+                        commentStartFound = true;
+                    }
+                    else
+                    {
+                        cerr << "Error: Invalid starting for comment." << endl;
+                        allGood = false;
+                    }
+                }
             }
             else if (c == '>')
             {
+                if (commentCompleted)
+                {
+                    commentCompleted = false;
+                    continue;
+                }
+                if (attributeFound || firstCommaFound)
+                {
+                    cerr << "Error: Inverted comma for value was not closed before ending tag." << endl;
+                    allGood = false;
+                }
                 if (openingBracketFound)
                 {
                     openingBracketFound = false;
@@ -157,6 +256,7 @@ int main()
                             if (tags.isEmpty())
                             {
                                 cerr << "Error: Closing tag '" << tag << "' without matching opening tag" << endl;
+                                allGood = false;
                             }
                             else
                             {
@@ -165,6 +265,7 @@ int main()
                                 {
                                     cerr << getTag << " was opened but a different tag i.e. " << tag
                                          << " is being closed before the opened one." << endl;
+                                    allGood = false;
                                 }
                             }
                         }
@@ -175,6 +276,7 @@ int main()
                 else
                 {
                     cerr << "Error: Closing Tag doesnot have an opening" << endl;
+                    allGood = false;
                 }
             }
             else if (openingBracketFound)
@@ -183,12 +285,44 @@ int main()
                 {
                     closingTagFound = true;
                 }
+                if (c == '=')
+                {
+                    attributeFound = true;
+                }
                 else
                 {
                     tag += c;
                 }
             }
-            i++;
+            else if (attributeFound)
+            {
+                if (!firstCommaFound)
+                {
+                    if (c != 34 && c != 39) // ASCII for ' and ""
+                    {
+                        cerr << "Error: No commas used for attribute value." << endl;
+                        allGood = false;
+                    }
+                    else
+                    {
+                        commaUsed = c;
+                        firstCommaFound = true;
+                    }
+                }
+                else
+                {
+                    if (c == 34 || c == 39)
+                    {
+                        if (c != commaUsed)
+                        {
+                            cerr << "Error: Different invertrd commas used for defining value." << endl;
+                            allGood = false;
+                        }
+                        attributeFound = false;
+                        firstCommaFound = false;
+                    }
+                }
+            }
         }
 
         lineNumber++;
@@ -200,6 +334,12 @@ int main()
     {
         string unclosedTag = tags.pop();
         cerr << "Error: Closing tag for '" << unclosedTag << "' is missing" << endl;
+        allGood = false;
+    }
+
+    if (allGood)
+    {
+        cout << endl << "All Good. No errors in the code." << endl;
     }
 
     file.close();
