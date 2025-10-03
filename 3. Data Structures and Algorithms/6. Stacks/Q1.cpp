@@ -10,120 +10,92 @@ template <typename T> class Stack
     class Node
     {
       public:
-        Node *next;
+        Node *prev;
         T data;
+        int lineNum;
 
-        Node()
+        Node(T d, int line = 0) : prev(nullptr), data(d), lineNum(line)
         {
-            next = nullptr;
-        }
-
-        Node(T d)
-        {
-            next = nullptr;
-            data = d;
         }
     };
 
-    Node *front;
-    Node *rear;
+    Node *top;
 
   public:
-    Stack()
+    Stack() : top(nullptr)
     {
-        front = rear = nullptr;
     }
 
-    Stack(T num)
+    Stack(T num, int line = 0)
     {
-        Node *n = new Node(num);
-        front = rear = n;
+        top = new Node(num, line);
     }
 
-    void push(T d)
+    void push(T d, int line = 0)
     {
-        Node *n = new Node(d);
-        if (!front)
-        {
-            front = rear = n;
-            return;
-        }
-
-        rear->next = n;
-        rear = n;
+        Node *n = new Node(d, line);
+        n->prev = top;
+        top = n;
     }
 
     T pop()
     {
-        if (!front)
-        {
+        if (!top)
             return T();
-        }
 
-        T temp = rear->data;
-
-        if (front == rear)
-        {
-            delete front;
-            front = rear = nullptr;
-            return temp;
-        }
-
-        Node *move = front;
-        Node *prev = nullptr;
-
-        while (move)
-        {
-            if (!move->next)
-            {
-                delete rear;
-                rear = prev;
-                rear->next = nullptr;
-                break;
-            }
-
-            prev = move;
-            move = move->next;
-        }
-
+        T temp = top->data;
+        Node *toDelete = top;
+        top = top->prev;
+        delete toDelete;
         return temp;
+    }
+
+    int getLineNum()
+    {
+        if (!top)
+            return 0;
+        return top->lineNum;
     }
 
     void print()
     {
-        cout << endl << "Stack with Linked List is: ";
-        Node *temp = front;
-
-        cout << temp->data;
-        temp = temp->next;
-
-        while (temp)
+        cout << "\nStack: ";
+        if (!top)
         {
-            cout << " <- " << temp->data;
-
-            temp = temp->next;
+            cout << "EMPTY" << endl;
+            return;
         }
 
-        cout << endl << endl;
+        Node *temp = top;
+        while (temp)
+        {
+            cout << temp->data;
+            if (temp->prev)
+                cout << " <- ";
+            temp = temp->prev;
+        }
+        cout << endl;
     }
 
     bool isEmpty()
     {
-        return !front;
+        return !top;
     }
 
     T peek()
     {
-        return rear->data;
+        if (!top)
+            return T();
+        return top->data;
     }
 
     ~Stack()
     {
-        while (front)
+        while (top)
         {
-            Node *move = front;
-            front = front->next;
-            delete move;
+            Node *toDelete = top;
+            top = top->prev;
+            delete toDelete;
         }
     }
 };
@@ -135,6 +107,7 @@ int main()
 
     ifstream file(
         "/Volumes/Data/Portfolio/Github/Programming Course/3. Data Structures and Algorithms/6. Stacks/test.xml");
+
     if (!file.is_open())
     {
         cout << "Error: Could not open file!" << endl;
@@ -144,202 +117,241 @@ int main()
     string line;
     int lineNumber = 0;
 
+    // Validate XML header
     getline(file, line);
-    int i = 0;
+    lineNumber++;
 
-    // header checks
-    if (line.size() < 2 || line[i++] != '<')
+    if (line.size() < 5 || line[0] != '<' || line[1] != '?')
     {
-        cerr << "Error: No opening tag for the header" << endl;
+        cerr << "Error: Invalid or missing XML header" << endl;
+        allGood = false;
+    }
+    else if (line[line.size() - 1] != '>' || line[line.size() - 2] != '?')
+    {
+        cerr << "Error: XML header not properly closed" << endl;
         allGood = false;
     }
 
-    if (i >= line.size() || line[i++] != '?')
-    {
-        cerr << "Error: Header not defined" << endl;
-        allGood = false;
-    }
-
-    i = line.size() - 1;
-    if (line[i] != '>')
-    {
-        cerr << "Error: No closing tag for the header" << endl;
-        allGood = false;
-    }
-
-    if (i == 0 || line[i - 1] != '?')
-    {
-        cerr << "Error: No closing ? for the header" << endl;
-        allGood = false;
-    }
-
-    // inner string checks
+    // Parse XML content
     while (getline(file, line))
     {
-        bool openingBracketFound = false;
-        bool closingTagFound = false;
-        bool attributeFound = false;
-        bool firstCommaFound = false;
-        bool commentStartFound = false;
-        bool commentCompleted = false;
+        lineNumber++;
+        bool insideTag = false;
+        bool closingTag = false;
+        bool insideAttribute = false;
+        bool insideComment = false;
+        bool tagNameComplete = false;
+        bool commentError = false;
         char commaUsed = '\0';
-        string tag = "";
+        string tagName = "";
 
         for (int i = 0; i < line.length(); i++)
         {
             char c = line[i];
 
-            if (c == '-') // ending of comment
+            // Handle comments
+            if (insideComment)
             {
-                if (commentStartFound)
+                if (c == '-' && i + 1 < line.length() && line[i + 1] == '-')
                 {
-                    if (line[i + 1] == '-' && line[i + 2] == '>')
+                    if (i + 2 < line.length() && line[i + 2] == '>')
                     {
-                        commentStartFound = false;
-                        commentCompleted = true;
-                    }
-                    else
-                    {
-                        cerr << "Invalid closing for comment." << endl;
-                        allGood = false;
+                        insideComment = false;
+                        i += 2;
                     }
                 }
+                continue;
             }
-            else if (c == '<')
+
+            // Opening tag bracket
+            if (c == '<')
             {
-                if (openingBracketFound)
+                if (insideTag)
                 {
-                    cerr << "Multiple Tags opened before closing the previous one." << endl;
+                    cerr << "Line " << lineNumber << ": Nested '<' found before closing previous tag" << endl;
                     allGood = false;
-                }
-                else
-                {
-                    openingBracketFound = true;
                 }
 
-                if (line[i + 1] == '!')
+                // Reset for new tag
+                insideTag = true;
+                tagName = "";
+                closingTag = false;
+                tagNameComplete = false;
+
+                // Check for comment
+                if (i + 3 < line.length() && line[i + 1] == '!' && line[i + 2] == '-' && line[i + 3] == '-')
                 {
-                    if (line[i + 2] == '-' && line[i + 3] == '-')
-                    {
-                        commentStartFound = true;
-                    }
-                    else
-                    {
-                        cerr << "Error: Invalid starting for comment." << endl;
-                        allGood = false;
-                    }
+                    insideComment = true;
+                    insideTag = false;
+                    i += 3;
+                }
+                // Check for closing tag
+                else if (i + 1 < line.length() && line[i + 1] == '/')
+                {
+                    closingTag = true;
+                    i++;
                 }
             }
+            // Closing tag bracket
             else if (c == '>')
             {
-                if (commentCompleted)
+                if (!insideTag)
                 {
-                    commentCompleted = false;
+                    cerr << "Line " << lineNumber << ": Found '>' without matching '<'" << endl;
+                    allGood = false;
                     continue;
                 }
-                if (attributeFound || firstCommaFound)
+
+                if (insideAttribute)
                 {
-                    cerr << "Error: Inverted comma for value was not closed before ending tag." << endl;
+                    cerr << "Line " << lineNumber << ": Attribute quote not closed before '>'" << endl;
                     allGood = false;
                 }
-                if (openingBracketFound)
+
+                // Check for self-closing tag
+                if (i > 0 && line[i - 1] == '/')
                 {
-                    openingBracketFound = false;
-                    if (!tag.empty())
+                    if (!tagName.empty() && tagName[tagName.length() - 1] == '/')
                     {
-                        if (!closingTagFound)
+                        tagName = tagName.substr(0, tagName.length() - 1);
+                    }
+                    insideTag = false;
+                    tagName = "";
+                    tagNameComplete = false;
+                    continue;
+                }
+
+                // Process complete tag
+                if (!tagName.empty())
+                {
+                    if (closingTag)
+                    {
+                        if (tags.isEmpty())
                         {
-                            tags.push(tag);
+                            cerr << "Line " << lineNumber << ": Closing tag '</" << tagName
+                                 << ">' has no matching opening tag" << endl;
+                            allGood = false;
                         }
                         else
                         {
-                            if (tags.isEmpty())
+                            int openingLine = tags.getLineNum();
+                            string openingTag = tags.pop();
+
+                            if (tagName != openingTag)
                             {
-                                cerr << "Error: Closing tag '" << tag << "' without matching opening tag" << endl;
+                                cerr << "Line " << openingLine << ": Closing tag '</" << openingTag << ">' is missing."
+                                     << endl;
                                 allGood = false;
                             }
-                            else
-                            {
-                                string getTag = tags.pop();
-                                if (tag != getTag)
-                                {
-                                    cerr << getTag << " was opened but a different tag i.e. " << tag
-                                         << " is being closed before the opened one." << endl;
-                                    allGood = false;
-                                }
-                            }
                         }
-                    }
-                    tag = "";
-                    closingTagFound = false;
-                }
-                else
-                {
-                    cerr << "Error: Closing Tag doesnot have an opening" << endl;
-                    allGood = false;
-                }
-            }
-            else if (openingBracketFound)
-            {
-                if (c == '/')
-                {
-                    closingTagFound = true;
-                }
-                if (c == '=')
-                {
-                    attributeFound = true;
-                }
-                else
-                {
-                    tag += c;
-                }
-            }
-            else if (attributeFound)
-            {
-                if (!firstCommaFound)
-                {
-                    if (c != 34 && c != 39) // ASCII for ' and ""
-                    {
-                        cerr << "Error: No commas used for attribute value." << endl;
-                        allGood = false;
                     }
                     else
                     {
-                        commaUsed = c;
-                        firstCommaFound = true;
+                        tags.push(tagName, lineNumber);
                     }
                 }
-                else
+
+                insideTag = false;
+                tagName = "";
+                insideAttribute = false;
+                tagNameComplete = false;
+            }
+            // Inside a tag
+            else if (insideTag)
+            {
+                if (insideAttribute)
                 {
-                    if (c == 34 || c == 39)
+                    if ((c == '"' || c == '\''))
                     {
-                        if (c != commaUsed)
+                        if (c == commaUsed)
                         {
-                            cerr << "Error: Different invertrd commas used for defining value." << endl;
-                            allGood = false;
+                            insideAttribute = false;
+                            commaUsed = '\0';
                         }
-                        attributeFound = false;
-                        firstCommaFound = false;
+                        else
+                        {
+                            // Mismatched quotes
+                            cerr << "Line " << lineNumber << ": Mismatched quote types in attribute value" << endl;
+                            allGood = false;
+                            insideAttribute = false;
+                            commaUsed = '\0';
+                        }
+                    }
+                }
+                else if (c == '=')
+                {
+                    tagNameComplete = true;
+
+                    // Find opening quote
+                    int j = i + 1;
+                    while (j < line.length() && isspace(line[j]))
+                        j++;
+
+                    if (j < line.length() && (line[j] == '"' || line[j] == '\''))
+                    {
+                        commaUsed = line[j];
+                        insideAttribute = true;
+                        i = j;
+                    }
+                    else
+                    {
+                        cerr << "Line " << lineNumber << ": Attribute value must be quoted" << endl;
+                        allGood = false;
+                    }
+                }
+                else if (c == '/' && i + 1 < line.length() && line[i + 1] == '>')
+                {
+                    tagName += c;
+                }
+                else if (!isspace(c))
+                {
+                    if (!tagNameComplete)
+                    {
+                        tagName += c;
+                    }
+                }
+                else // Space character
+                {
+                    if (!tagName.empty())
+                    {
+                        tagNameComplete = true;
                     }
                 }
             }
         }
 
-        lineNumber++;
-        cout << endl << "Line " << lineNumber << ": " << line << endl;
+        // Check for unclosed tag on this line
+        if (insideTag)
+        {
+            cerr << "Line " << lineNumber << ": Tag not closed on this line" << endl;
+            allGood = false;
+        }
+
+        // Check if comment was not properly closed
+        if (insideComment && !commentError)
+        {
+            cerr << "Line " << lineNumber << ": Comment not properly closed (missing '>')" << endl;
+            allGood = false;
+            commentError = true;
+        }
     }
 
-    // if any tags were not closed
+    // Check for unclosed tags at EOF
     while (!tags.isEmpty())
     {
+        int openingLine = tags.getLineNum();
         string unclosedTag = tags.pop();
-        cerr << "Error: Closing tag for '" << unclosedTag << "' is missing" << endl;
+        cerr << "Error: Tag '<" << unclosedTag << ">' opened at line " << openingLine << " was never closed" << endl;
         allGood = false;
     }
 
     if (allGood)
     {
-        cout << endl << "All Good. No errors in the code." << endl;
+        cout << "\nValidation complete: XML is well-formed with no errors!" << endl;
+    }
+    else
+    {
+        cout << "\nValidation complete: XML has errors (see above)" << endl;
     }
 
     file.close();

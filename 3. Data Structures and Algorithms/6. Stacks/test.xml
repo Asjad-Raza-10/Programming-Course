@@ -1,7 +1,53 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<note>
-<to>Tove</to>
-<from>Jani</from>
-<heading>Reminder</heading>
-<message>Don't forget me this weekend!</message>
-</note>
+<!-- This is a valid comment -->
+    <book category="cooking">
+        <title lang="en">Everyday Italian</title>
+        <author>Giada De Laurentiis</author>
+        <year>2005</year>
+        <price>30.00</price>
+    </book>
+    
+    <!-- Testing self-closing tags -->
+    <divider/>
+    
+    <book category="children">
+        <title lang="en">Harry Potter
+        <author>J. K. Rowling</author>
+        <year>2005</year>
+        <price>29.99</price>
+    </book>
+    
+    <!-- Comment not closed properly --
+    
+    <book category='fiction">
+        <title>The Great Gatsby</title>
+        <author>F. Scott Fitzgerald
+        <year>1925</year>
+        </author>
+        </book>
+    
+    <magazine>
+        <name>Tech Weekly</name>
+        <<edition>Spring 2024</edition>
+        <publisher>Tech Corp</publisher>
+    </magazine>
+    
+    <newspaper type=unquoted>
+        <title>Daily News</title>
+        <date>2024-01-15</date>
+    </newspaper>
+    
+    <journal>
+        <title>Science Today</title>
+        <volume>42</volume>
+    </journal>
+    
+    </newspaper>
+    
+    <catalog>
+        <item id="001">
+            <name>Widget</name>
+            <price currency="USD">19.99</price>
+    
+    <unclosed>
+        <data>This tag will never close</data>
