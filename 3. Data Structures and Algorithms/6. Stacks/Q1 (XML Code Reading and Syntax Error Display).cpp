@@ -221,6 +221,9 @@ int main()
                     continue;
                 }
 
+                // cout << endl << "Debug at Line: " << lineNumber << " if c is > before processing tag" << endl;
+                // tags.print();
+
                 // Process complete tag
                 if (!tagName.empty())
                 {
@@ -234,14 +237,20 @@ int main()
                         }
                         else
                         {
-                            int openingLine = tags.getLineNum();
-                            string openingTag = tags.pop();
-
-                            if (tagName != openingTag)
+                            while (!tags.isEmpty())
                             {
-                                cerr << "Line " << openingLine << ": Closing tag '</" << openingTag << ">' is missing."
-                                     << endl;
-                                allGood = false;
+                                string expectedTag = tags.pop();
+                                int openingLine = tags.getLineNum();
+                                if (tagName != expectedTag)
+                                {
+                                    cerr << "Line " << (openingLine + 1) << ": Closing tag '</" << expectedTag
+                                         << ">' is missing." << endl;
+                                    allGood = false;
+                                }
+                                else
+                                {
+                                    break;
+                                }
                             }
                         }
                     }
@@ -250,6 +259,9 @@ int main()
                         tags.push(tagName, lineNumber);
                     }
                 }
+
+                // cout << endl << "Debug at Line: " << lineNumber << " if c is > after processing tag" << endl;
+                // tags.print();
 
                 insideTag = false;
                 tagName = "";
