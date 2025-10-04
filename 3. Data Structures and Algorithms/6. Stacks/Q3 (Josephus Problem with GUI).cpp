@@ -8,81 +8,114 @@ using namespace std;
 template <typename T> class CircularQueue
 {
   private:
-    class Node
-    {
-      public:
-        T data;
-        Node *prev;
-        Node *next;
+    T *arr;
+    int capacity;
+    int frontIndex;
+    int rearIndex;
+    int count;
 
-        Node(T d)
+    void grow()
+    {
+        int newCapacity = capacity * 2;
+        T *newArr = new T[newCapacity];
+
+        for (int i = 0; i < count; i++)
         {
-            data = d;
-            prev = next = nullptr;
+            newArr[i] = arr[(frontIndex + i) % capacity];
         }
-    };
-    Node *front;
-    Node *currentPosition;
+
+        delete[] arr;
+        arr = newArr;
+        capacity = newCapacity;
+        frontIndex = 0;
+        rearIndex = count - 1;
+    }
+
+    void shrink()
+    {
+        if (capacity <= 5)
+        {
+            return;
+        }
+
+        int newCapacity = capacity / 2;
+        T *newArr = new T[newCapacity];
+
+        for (int i = 0; i < count; i++)
+        {
+            newArr[i] = arr[(frontIndex + i) % capacity];
+        }
+
+        delete[] arr;
+        arr = newArr;
+        capacity = newCapacity;
+        frontIndex = 0;
+        rearIndex = count - 1;
+    }
+
+    bool isHalf()
+    {
+        return count <= capacity / 2;
+    }
 
   public:
     CircularQueue()
     {
-        front = currentPosition = nullptr;
+        capacity = 5;
+        arr = new T[capacity];
+        frontIndex = 0;
+        rearIndex = -1;
+        count = 0;
     }
 
     void enqueue(T data)
     {
-        Node *temp = new Node(data);
-        if (!front)
+        if (count == capacity)
         {
-            front = temp;
-            front->next = front;
-            front->prev = front;
-            return;
+            grow();
         }
 
-        Node *last = front->prev;
-        temp->next = front;
-        front->prev = temp;
-        temp->prev = last;
-        last->next = temp;
+        rearIndex = (rearIndex + 1) % capacity;
+        arr[rearIndex] = data;
+        count++;
     }
 
     void dequeue()
     {
-        if (!front)
+        if (count == 0)
         {
             return;
         }
 
-        if (front->next == front)
+        frontIndex = (frontIndex + 1) % capacity;
+        count--;
+
+        if (count == 0)
         {
-            delete front;
-            front = nullptr;
-            return;
+            frontIndex = 0;
+            rearIndex = -1;
         }
 
-        Node *temp = front->next;
-        Node *last = front->prev;
+        if (isHalf())
+        {
+            shrink();
+        }
+    }
 
-        last->next = temp;
-        temp->prev = last;
-        delete front;
-        front = temp;
+    T getFront()
+    {
+        if (count > 0)
+        {
+            return arr[frontIndex];
+        }
+        return T();
     }
 
     void clear()
     {
-        if (!front)
-        {
-            return;
-        }
-        while (front->next != front)
-        {
-            dequeue();
-        }
-        delete front;
-        front = nullptr;
+        count = 0;
+        frontIndex = 0;
+        rearIndex = -1;
     }
 
     void Load(int size)
@@ -92,95 +125,83 @@ template <typename T> class CircularQueue
         {
             enqueue(i);
         }
-        currentPosition = front; // Initialize current position to front
     }
 
     // Get all current elements for visualization
     vector<T> getAllElements()
     {
         vector<T> elements;
-        if (!front)
-            return elements;
-
-        Node *move = front;
-        do
+        for (int i = 0; i < count; i++)
         {
-            elements.push_back(move->data);
-            move = move->next;
-        } while (move != front);
-
+            elements.push_back(arr[(frontIndex + i) % capacity]);
+        }
         return elements;
+    }
+
+    // Rotate queue: move front element to rear
+    void rotate()
+    {
+        if (count <= 1)
+        {
+            return;
+        }
+
+        T frontElement = arr[frontIndex];
+        frontIndex = (frontIndex + 1) % capacity;
+        rearIndex = (rearIndex + 1) % capacity;
+        arr[rearIndex] = frontElement;
     }
 
     // Modified JP for step-by-step visualization
     bool stepJP(int k, T &eliminated)
     {
-        if (!front || front->next == front)
+        if (count == 0)
         {
-            if (front)
-            {
-                eliminated = front->data;
-                delete front;
-                front = nullptr;
-            }
             return false; // No more eliminations
         }
 
-        Node *current = currentPosition;
+        if (count == 1)
+        {
+            eliminated = arr[frontIndex];
+            clear();
+            return false; // Last element eliminated
+        }
 
-        // Count k-1 steps
+        // Rotate k-1 times to get the element to eliminate at front
         for (int i = 0; i < k - 1; i++)
         {
-            current = current->next;
+            rotate();
         }
 
-        eliminated = current->data;
-        Node *nodeToDelete = current;
-        currentPosition = current->next;
-        current->prev->next = current->next;
-        current->next->prev = current->prev;
-        current = current->next;
-
-        if (nodeToDelete == front)
-        {
-            front = current;
-        }
-        delete nodeToDelete;
+        // Eliminate the front element
+        eliminated = arr[frontIndex];
+        dequeue();
 
         return true; // More eliminations remaining
     }
 
     T getLastElement()
     {
-        if (front)
-            return front->data;
+        if (count > 0)
+        {
+            return arr[frontIndex];
+        }
         return T();
     }
 
     bool isEmpty()
     {
-        return front == nullptr;
+        return count == 0;
     }
 
     int size()
     {
-        if (!front)
-            return 0;
-
-        int count = 0;
-        Node *move = front;
-        do
-        {
-            count++;
-            move = move->next;
-        } while (move != front);
         return count;
     }
 
     ~CircularQueue()
     {
-        clear();
-        currentPosition = nullptr;
+        delete[] arr;
     }
 };
 
