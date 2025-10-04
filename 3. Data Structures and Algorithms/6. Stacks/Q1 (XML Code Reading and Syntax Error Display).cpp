@@ -132,7 +132,7 @@ int main()
         allGood = false;
     }
 
-    // Parse XML content
+    // Read XML content line by line
     while (getline(file, line))
     {
         lineNumber++;
