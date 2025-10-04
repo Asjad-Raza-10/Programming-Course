@@ -105,8 +105,7 @@ int main()
     Stack<string> tags;
     bool allGood = true;
 
-    ifstream file(
-        "/Volumes/Data/Portfolio/Github/Programming Course/3. Data Structures and Algorithms/6. Stacks/test.xml");
+    ifstream file("test.xml");
 
     if (!file.is_open())
     {
