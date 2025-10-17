@@ -105,7 +105,7 @@ int main()
     Stack<string> tags;
     bool allGood = true;
 
-    ifstream file("test.xml");
+    ifstream file("/Users/asjadraza/test.xml");
 
     if (!file.is_open())
     {
