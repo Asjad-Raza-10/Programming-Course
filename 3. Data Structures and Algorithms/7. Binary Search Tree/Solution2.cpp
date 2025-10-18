@@ -225,12 +225,14 @@ template <typename K, typename V> class SpecialBST
         {
             Node *parent = node->parent;
 
-            if (parent == nullptr) // Already root
+            if (!parent) // Already root
+            {
                 break;
+            }
 
             Node *grandparent = parent->parent;
 
-            if (grandparent == nullptr) // Zig: Parent is root (single rotation)
+            if (!grandparent) // Parent is root (single rotation)
             {
                 if (node == parent->left)
                 {
@@ -241,22 +243,26 @@ template <typename K, typename V> class SpecialBST
                     root = leftRotation(parent);
                 }
             }
-            else // Zig-Zig or Zig-Zag: Has grandparent (double rotation)
+            else // Has grandparent (double rotation)
             {
                 Node *greatGrandparent = grandparent->parent;
                 bool isLeftChild = (greatGrandparent != nullptr && grandparent == greatGrandparent->left);
 
-                if (node == parent->left && parent == grandparent->left) // Zig-Zig Left-Left
+                if (node == parent->left && parent == grandparent->left) // Left-Left
                 {
                     Node *newSubtreeRoot = rightRotation(grandparent);
                     newSubtreeRoot = rightRotation(newSubtreeRoot);
 
-                    if (greatGrandparent != nullptr)
+                    if (greatGrandparent)
                     {
                         if (isLeftChild)
+                        {
                             greatGrandparent->left = newSubtreeRoot;
+                        }
                         else
+                        {
                             greatGrandparent->right = newSubtreeRoot;
+                        }
                         newSubtreeRoot->parent = greatGrandparent;
                     }
                     else
@@ -265,17 +271,21 @@ template <typename K, typename V> class SpecialBST
                         root->parent = nullptr;
                     }
                 }
-                else if (node == parent->right && parent == grandparent->right) // Zig-Zig Right-Right
+                else if (node == parent->right && parent == grandparent->right) // Right-Right
                 {
                     Node *newSubtreeRoot = leftRotation(grandparent);
                     newSubtreeRoot = leftRotation(newSubtreeRoot);
 
-                    if (greatGrandparent != nullptr)
+                    if (greatGrandparent)
                     {
                         if (isLeftChild)
+                        {
                             greatGrandparent->left = newSubtreeRoot;
+                        }
                         else
+                        {
                             greatGrandparent->right = newSubtreeRoot;
+                        }
                         newSubtreeRoot->parent = greatGrandparent;
                     }
                     else
@@ -284,7 +294,7 @@ template <typename K, typename V> class SpecialBST
                         root->parent = nullptr;
                     }
                 }
-                else if (node == parent->right && parent == grandparent->left) // Zig-Zag Left-Right
+                else if (node == parent->right && parent == grandparent->left) // Left-Right
                 {
                     Node *newSubtreeRoot = leftRotation(parent);
                     grandparent->left = newSubtreeRoot;
@@ -295,9 +305,13 @@ template <typename K, typename V> class SpecialBST
                     if (greatGrandparent != nullptr)
                     {
                         if (isLeftChild)
+                        {
                             greatGrandparent->left = newSubtreeRoot;
+                        }
                         else
+                        {
                             greatGrandparent->right = newSubtreeRoot;
+                        }
                         newSubtreeRoot->parent = greatGrandparent;
                     }
                     else
@@ -306,7 +320,7 @@ template <typename K, typename V> class SpecialBST
                         root->parent = nullptr;
                     }
                 }
-                else // Zig-Zag Right-Left
+                else // Right-Left
                 {
                     Node *newSubtreeRoot = rightRotation(parent);
                     grandparent->right = newSubtreeRoot;
@@ -314,12 +328,16 @@ template <typename K, typename V> class SpecialBST
 
                     newSubtreeRoot = leftRotation(grandparent);
 
-                    if (greatGrandparent != nullptr)
+                    if (greatGrandparent)
                     {
                         if (isLeftChild)
+                        {
                             greatGrandparent->left = newSubtreeRoot;
+                        }
                         else
+                        {
                             greatGrandparent->right = newSubtreeRoot;
+                        }
                         newSubtreeRoot->parent = greatGrandparent;
                     }
                     else
