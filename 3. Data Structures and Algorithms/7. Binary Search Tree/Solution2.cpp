@@ -15,10 +15,14 @@ template <typename K, typename V> class SpecialBST
         V value;
         Node *left;
         Node *right;
-        Node(K k, V v) : key(k), value(v), left(nullptr), right(nullptr)
+        Node *parent;
+        int height;
+
+        Node(K k, V v) : key(k), value(v), left(nullptr), right(nullptr), parent(nullptr), height(1)
         {
         }
     };
+
     Node *root;
 
     // helping functions recursion
@@ -35,32 +39,53 @@ template <typename K, typename V> class SpecialBST
         return node;
     }
 
-    Node *remove(Node *node, K key, bool &r)
+    Node *remove(Node *node, K key, bool &r, Node *&parentOfDeleted)
     {
         if (!node)
         {
             return node;
         }
+
         if (key < node->key)
         {
-            node->left = remove(node->left, key, r);
+            node->left = remove(node->left, key, r, parentOfDeleted);
+            if (node->left)
+            {
+                node->left->parent = node;
+            }
         }
         else if (key > node->key)
         {
-            node->right = remove(node->right, key, r);
+            node->right = remove(node->right, key, r, parentOfDeleted);
+            if (node->right)
+            {
+                node->right->parent = node;
+            }
         }
         else
         {
             r = true;
+            parentOfDeleted = node->parent;
+
             if (!node->left)
             {
                 Node *temp = node->right;
+                if (temp)
+                {
+                    temp->parent = node->parent;
+                }
+
                 delete node;
                 return temp;
             }
             else if (!node->right)
             {
                 Node *temp = node->left;
+                if (temp)
+                {
+                    temp->parent = node->parent;
+                }
+
                 delete node;
                 return temp;
             }
@@ -69,9 +94,17 @@ template <typename K, typename V> class SpecialBST
                 Node *temp = findMax(node->left);
                 node->key = temp->key;
                 node->value = temp->value;
-                node->left = remove(node->left, temp->key, r);
+                node->left = remove(node->left, temp->key, r, parentOfDeleted);
+                if (node->left)
+                {
+                    node->left->parent = node;
+                }
+
+                parentOfDeleted = node;
             }
         }
+
+        node->height = max(Height(node->left), Height(node->right)) + 1;
         return node;
     }
 
@@ -110,6 +143,195 @@ template <typename K, typename V> class SpecialBST
         inOrderWithKeys(node->right, keys, values);
     }
 
+    // Functions for rotation till root
+
+    int Height(Node *temp)
+    {
+        if (!temp)
+        {
+            return 0;
+        }
+        return temp->height;
+    }
+
+    int max(int a, int b)
+    {
+        return (a > b) ? a : b;
+    }
+
+    Node *rightRotation(Node *x)
+    {
+        Node *y = x->left;
+        Node *T2 = y->right;
+
+        // Perform rotation
+        y->right = x;
+        x->left = T2;
+
+        // Update parent pointers
+        y->parent = x->parent;
+        x->parent = y;
+        if (T2)
+        {
+            T2->parent = x;
+        }
+
+        // Update heights
+        x->height = max(Height(x->left), Height(x->right)) + 1;
+        y->height = max(Height(y->left), Height(y->right)) + 1;
+
+        return y;
+    }
+
+    Node *leftRotation(Node *x)
+    {
+        Node *y = x->right;
+        Node *T2 = y->left;
+
+        // Perform rotation
+        y->left = x;
+        x->right = T2;
+
+        // Update parent pointers
+        y->parent = x->parent;
+        x->parent = y;
+        if (T2)
+        {
+            T2->parent = x;
+        }
+
+        // Update heights
+        x->height = max(Height(x->left), Height(x->right)) + 1;
+        y->height = max(Height(y->left), Height(y->right)) + 1;
+
+        return y;
+    }
+
+    int getBalanceFactor(Node *temp)
+    {
+        if (!temp)
+        {
+            return 0;
+        }
+        return Height(temp->left) - Height(temp->right);
+    }
+
+    void moveToRoot(Node *node)
+    {
+        if (node == nullptr)
+            return;
+
+        while (node != root) // Keep rotating until node becomes root
+        {
+            Node *parent = node->parent;
+
+            if (parent == nullptr) // Already root
+                break;
+
+            Node *grandparent = parent->parent;
+
+            if (grandparent == nullptr) // Zig: Parent is root (single rotation)
+            {
+                if (node == parent->left)
+                {
+                    root = rightRotation(parent);
+                }
+                else
+                {
+                    root = leftRotation(parent);
+                }
+            }
+            else // Zig-Zig or Zig-Zag: Has grandparent (double rotation)
+            {
+                Node *greatGrandparent = grandparent->parent;
+                bool isLeftChild = (greatGrandparent != nullptr && grandparent == greatGrandparent->left);
+
+                if (node == parent->left && parent == grandparent->left) // Zig-Zig Left-Left
+                {
+                    Node *newSubtreeRoot = rightRotation(grandparent);
+                    newSubtreeRoot = rightRotation(newSubtreeRoot);
+
+                    if (greatGrandparent != nullptr)
+                    {
+                        if (isLeftChild)
+                            greatGrandparent->left = newSubtreeRoot;
+                        else
+                            greatGrandparent->right = newSubtreeRoot;
+                        newSubtreeRoot->parent = greatGrandparent;
+                    }
+                    else
+                    {
+                        root = newSubtreeRoot;
+                        root->parent = nullptr;
+                    }
+                }
+                else if (node == parent->right && parent == grandparent->right) // Zig-Zig Right-Right
+                {
+                    Node *newSubtreeRoot = leftRotation(grandparent);
+                    newSubtreeRoot = leftRotation(newSubtreeRoot);
+
+                    if (greatGrandparent != nullptr)
+                    {
+                        if (isLeftChild)
+                            greatGrandparent->left = newSubtreeRoot;
+                        else
+                            greatGrandparent->right = newSubtreeRoot;
+                        newSubtreeRoot->parent = greatGrandparent;
+                    }
+                    else
+                    {
+                        root = newSubtreeRoot;
+                        root->parent = nullptr;
+                    }
+                }
+                else if (node == parent->right && parent == grandparent->left) // Zig-Zag Left-Right
+                {
+                    Node *newSubtreeRoot = leftRotation(parent);
+                    grandparent->left = newSubtreeRoot;
+                    newSubtreeRoot->parent = grandparent;
+
+                    newSubtreeRoot = rightRotation(grandparent);
+
+                    if (greatGrandparent != nullptr)
+                    {
+                        if (isLeftChild)
+                            greatGrandparent->left = newSubtreeRoot;
+                        else
+                            greatGrandparent->right = newSubtreeRoot;
+                        newSubtreeRoot->parent = greatGrandparent;
+                    }
+                    else
+                    {
+                        root = newSubtreeRoot;
+                        root->parent = nullptr;
+                    }
+                }
+                else // Zig-Zag Right-Left
+                {
+                    Node *newSubtreeRoot = rightRotation(parent);
+                    grandparent->right = newSubtreeRoot;
+                    newSubtreeRoot->parent = grandparent;
+
+                    newSubtreeRoot = leftRotation(grandparent);
+
+                    if (greatGrandparent != nullptr)
+                    {
+                        if (isLeftChild)
+                            greatGrandparent->left = newSubtreeRoot;
+                        else
+                            greatGrandparent->right = newSubtreeRoot;
+                        newSubtreeRoot->parent = greatGrandparent;
+                    }
+                    else
+                    {
+                        root = newSubtreeRoot;
+                        root->parent = nullptr;
+                    }
+                }
+            }
+        }
+    }
+
   public:
     SpecialBST() : root(nullptr)
     {
@@ -120,11 +342,14 @@ template <typename K, typename V> class SpecialBST
         if (!root)
         {
             root = new Node(k, v);
+            // No need to move to root, already at root
             return true;
         }
         else
         {
             Node *temp = root;
+            Node *newNode = nullptr;
+
             while (true)
             {
                 if (temp->key < k)
@@ -132,7 +357,9 @@ template <typename K, typename V> class SpecialBST
                     if (!temp->right)
                     {
                         temp->right = new Node(k, v);
-                        return true;
+                        temp->right->parent = temp; // Set parent
+                        newNode = temp->right;      // Save pointer
+                        break;
                     }
                     temp = temp->right;
                 }
@@ -141,15 +368,23 @@ template <typename K, typename V> class SpecialBST
                     if (!temp->left)
                     {
                         temp->left = new Node(k, v);
-                        return true;
+                        temp->left->parent = temp; // Set parent
+                        newNode = temp->left;      // Save pointer
+                        break;
                     }
                     temp = temp->left;
                 }
                 else
                 {
+                    // Duplicate key found, move it to root
+                    moveToRoot(temp);
                     return false;
                 }
             }
+
+            // Move the newly inserted node to root
+            moveToRoot(newNode);
+            return true;
         }
     }
 
@@ -159,41 +394,82 @@ template <typename K, typename V> class SpecialBST
         {
             return nullptr;
         }
-        if (root->key == k)
-        {
-            return &root->value;
-        }
 
         Node *temp = root;
-        while (true)
+        Node *lastAccessed = root; // Track last accessed node
+
+        while (temp)
         {
-            if (temp->key < k)
+            lastAccessed = temp; // Update last accessed
+
+            if (temp->key == k)
             {
-                if (!temp->right)
-                {
-                    return nullptr;
-                }
-                temp = temp->right;
+                // Move the found node to root
+                moveToRoot(temp);
+                return &temp->value;
             }
-            else if (temp->key > k)
+            else if (temp->key < k)
             {
-                if (!temp->left)
-                {
-                    return nullptr;
-                }
-                temp = temp->left;
+                temp = temp->right;
             }
             else
             {
-                return &temp->value;
+                temp = temp->left;
             }
         }
+
+        // Not found, move the last accessed node (where search terminated) to root
+        moveToRoot(lastAccessed);
+        return nullptr;
     }
 
     bool remove(K key)
     {
         bool removed = false;
-        root = remove(root, key, removed);
+        Node *parentOfDeleted = nullptr;
+
+        root = remove(root, key, removed, parentOfDeleted);
+
+        if (root)
+        {
+            root->parent = nullptr; // Root has no parent
+        }
+
+        if (removed && parentOfDeleted)
+        {
+            // Move the parent of deleted node to root
+            moveToRoot(parentOfDeleted);
+        }
+        else if (!removed)
+        {
+            // Key not found, find and move last accessed node to root
+            Node *temp = root;
+            Node *lastAccessed = root;
+
+            while (temp)
+            {
+                lastAccessed = temp;
+
+                if (temp->key == key)
+                {
+                    break;
+                }
+                else if (temp->key < key)
+                {
+                    temp = temp->right;
+                }
+                else
+                {
+                    temp = temp->left;
+                }
+            }
+
+            if (lastAccessed)
+            {
+                moveToRoot(lastAccessed);
+            }
+        }
+
         return removed;
     }
 
@@ -248,51 +524,54 @@ template <typename K, typename V> class SpecialBST
         {
             return nullptr;
         }
-        if (root->key == k)
-        {
-            return root;
-        }
 
         Node *temp = root;
-        while (true)
+        Node *lastAccessed = root;
+
+        while (temp)
         {
-            if (temp->key < k)
+            lastAccessed = temp;
+
+            if (temp->key == k)
             {
-                if (!temp->right)
-                {
-                    return nullptr;
-                }
-                temp = temp->right;
+                // Move the found node to root
+                moveToRoot(temp);
+                return temp;
             }
-            else if (temp->key > k)
+            else if (temp->key < k)
             {
-                if (!temp->left)
-                {
-                    return nullptr;
-                }
-                temp = temp->left;
+                temp = temp->right;
             }
             else
             {
-                return &temp;
+                temp = temp->left;
             }
         }
+
+        // Not found, move the last accessed node to root
+        moveToRoot(lastAccessed);
+        return nullptr;
     }
 
     bool update(K oldKey, K newKey, V newValue)
     {
-        if (search(oldKey))
+        if (search(oldKey)) // This will move the found node to root
         {
-            bool f = 0; // just to pass in the function
-            root = remove(root, oldKey, f);
-            if (insert(newKey, newValue))
+            bool f = false;
+            Node *parentOfDeleted = nullptr;
+            root = remove(root, oldKey, f, parentOfDeleted);
+
+            if (root)
             {
-                cout << "\nRecord updated inserted successfully!\n";
+                root->parent = nullptr;
+            }
+
+            if (insert(newKey, newValue)) // This will move the new node to root
+            {
                 return true;
             }
             else
             {
-                cout << "\nRoll Number already exists!\n";
                 return false;
             }
         }
@@ -442,7 +721,7 @@ class StudentList
 
         cout << endl << "======== STUDENTS RECORD =======" << endl;
 
-        for (int i = 0; i < s.capacity(); i++)
+        for (int i = 0; i < s.size(); i++)
         {
             cout << "Roll Number: " << rollNo[i] << endl;
             s[i].print();
@@ -522,6 +801,104 @@ bool isValidYear(int year)
     return true;
 }
 
+void testSpecialBST()
+{
+    SpecialBST<int, int> bst;
+
+    cout << "======= Testing SpecialBST with moveToRoot =======\n\n";
+
+    // Insert values
+    cout << "Inserting: 50, 30, 70, 20, 40, 60\n\n";
+
+    bst.insert(50, 50);
+    cout << "After inserting 50 (should be root):\n";
+    cout << "Level-wise: ";
+    vector<int> v = bst.getValuesLevelWise();
+    for (int i : v)
+        cout << i << " ";
+    cout << "\n\n";
+
+    bst.insert(30, 30);
+    cout << "After inserting 30 (30 moves to root):\n";
+    cout << "Level-wise: ";
+    v = bst.getValuesLevelWise();
+    for (int i : v)
+        cout << i << " ";
+    cout << "\n\n";
+
+    bst.insert(70, 70);
+    cout << "After inserting 70 (70 moves to root):\n";
+    cout << "Level-wise: ";
+    v = bst.getValuesLevelWise();
+    for (int i : v)
+        cout << i << " ";
+    cout << "\n\n";
+
+    bst.insert(20, 20);
+    cout << "After inserting 20 (20 moves to root):\n";
+    cout << "Level-wise: ";
+    v = bst.getValuesLevelWise();
+    for (int i : v)
+        cout << i << " ";
+    cout << "\n\n";
+
+    bst.insert(40, 40);
+    cout << "After inserting 40 (40 moves to root):\n";
+    cout << "Level-wise: ";
+    v = bst.getValuesLevelWise();
+    for (int i : v)
+        cout << i << " ";
+    cout << "\n\n";
+
+    bst.insert(60, 60);
+    cout << "After inserting 60 (60 moves to root):\n";
+    cout << "Level-wise: ";
+    v = bst.getValuesLevelWise();
+    for (int i : v)
+        cout << i << " ";
+    cout << "\n\n";
+
+    // Test search
+    cout << "Searching for 20 (20 should move to root):\n";
+    int *result = bst.search(20);
+    if (result)
+        cout << "Found: " << *result << endl;
+    cout << "Level-wise after search: ";
+    v = bst.getValuesLevelWise();
+    for (int i : v)
+        cout << i << " ";
+    cout << "\n\n";
+
+    // Test search for non-existent key
+    cout << "Searching for 25 (not found, last accessed node moves to root):\n";
+    result = bst.search(25);
+    if (result)
+        cout << "Found: " << *result << endl;
+    else
+        cout << "Not found!" << endl;
+    cout << "Level-wise after failed search: ";
+    v = bst.getValuesLevelWise();
+    for (int i : v)
+        cout << i << " ";
+    cout << "\n\n";
+
+    // Test delete
+    cout << "Deleting 30 (parent of deleted moves to root):\n";
+    bool deleted = bst.remove(30);
+    cout << (deleted ? "Deleted successfully" : "Not found") << endl;
+    cout << "Level-wise after delete: ";
+    v = bst.getValuesLevelWise();
+    for (int i : v)
+        cout << i << " ";
+    cout << "\n\n";
+
+    cout << "Final In-order traversal (should be sorted): ";
+    vector<int> inorder = bst.getValuesinOrder();
+    for (int i : inorder)
+        cout << i << " ";
+    cout << "\n";
+}
+
 int main()
 {
     StudentList studentList;
@@ -535,6 +912,7 @@ int main()
         cout << "Press S to search a student by roll number.\n";
         cout << "Press U to update the data of a student.\n";
         cout << "Press P to print all students sorted by roll number.\n";
+        cout << "Press C to check the Special BST Implementation.\n";
         cout << "Press E to exit.\n\n";
         cout << "Enter your choice: ";
         cin >> choice;
@@ -673,6 +1051,11 @@ int main()
             cout << "\nExiting the system. Goodbye!\n";
             break;
         }
+
+        case 'c':
+        case 'C':
+            testSpecialBST();
+            break;
 
         default: {
             cout << "\nInvalid choice! Please try again.\n";
