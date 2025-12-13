@@ -6,11 +6,11 @@ using namespace std;
 
 template <typename T> class LinkedList
 {
-private:
+  private:
     class Node
     {
-    public:
-        Node* next;
+      public:
+        Node *next;
         T data;
 
         Node()
@@ -25,36 +25,37 @@ private:
         }
     };
 
-    Node* head;
-    Node* tail;
+    Node *head;
+    Node *tail;
 
-public:
+  public:
     class Iterator
     {
-        Node* node;
-    public:
-        Iterator(Node* nd = nullptr)
+        Node *node;
+
+      public:
+        Iterator(Node *nd = nullptr)
         {
             node = nd;
         }
 
-        Iterator& operator=(Node* pNode)
+        Iterator &operator=(Node *pNode)
         {
             this->node = pNode;
             return *this;
         }
 
         // Prefix ++ overload
-        Iterator& operator++()
+        Iterator &operator++()
         {
             if (node)
             {
                 node = node->next;
-            }      
+            }
             return *this;
         }
 
-        bool operator !=(const Iterator& nd)
+        bool operator!=(const Iterator &nd)
         {
             return nd.node != this->node;
         }
@@ -83,13 +84,13 @@ public:
 
     LinkedList(T num)
     {
-        Node* n = new Node(num);
+        Node *n = new Node(num);
         head = tail = n;
     }
 
     void InsertAtBeginning(T d)
     {
-        Node* n = new Node(d);
+        Node *n = new Node(d);
         if (!head)
         {
             head = tail = n;
@@ -102,7 +103,7 @@ public:
 
     void InsertAtEnd(T d)
     {
-        Node* n = new Node(d);
+        Node *n = new Node(d);
         if (!head)
         {
             head = tail = n;
@@ -121,9 +122,9 @@ public:
             return;
         }
 
-        Node* n = new Node(val);
-        Node* move = head;
-        Node* prev = head;
+        Node *n = new Node(val);
+        Node *move = head;
+        Node *prev = head;
 
         int i = 0;
 
@@ -160,7 +161,7 @@ public:
             return;
         }
 
-        Node* temp = head->next;
+        Node *temp = head->next;
         delete head;
         head = temp;
     }
@@ -178,8 +179,8 @@ public:
             return;
         }
 
-        Node* move = head;
-        Node* prev = nullptr;
+        Node *move = head;
+        Node *prev = nullptr;
 
         while (move)
         {
@@ -204,8 +205,8 @@ public:
             return;
         }
 
-        Node* move = head;
-        Node* prev = head;
+        Node *move = head;
+        Node *prev = head;
 
         int i = 0;
 
@@ -244,7 +245,7 @@ public:
 
     int Search(T val)
     {
-        Node* move = head;
+        Node *move = head;
         int i = 0;
 
         while (move)
@@ -263,23 +264,23 @@ public:
 
     void Reverse()
     {
-        Node* prev = nullptr;
-        Node* current = head;
+        Node *prev = nullptr;
+        Node *current = head;
         while (current)
         {
-            Node* temp = current->next;
+            Node *temp = current->next;
             current->next = prev;
             prev = current;
             current = temp;
         }
-        Node* temp = head;
+        Node *temp = head;
         head = tail;
         tail = temp;
     }
 
     void Display()
     {
-        Node* temp = head;
+        Node *temp = head;
         cout << "[" << temp->data;
         temp = temp->next;
 
@@ -294,7 +295,7 @@ public:
 
     int getSize()
     {
-        Node* temp = head;
+        Node *temp = head;
         int n = 0;
         while (temp)
         {
@@ -308,7 +309,7 @@ public:
     {
         while (head)
         {
-            Node* move = head;
+            Node *move = head;
             head = head->next;
             delete move;
         }
@@ -317,10 +318,10 @@ public:
 
 class GraphUsingAdjMatrix
 {
-private:
+  private:
     int vertices;
     bool isDirected;
-    int** adjM;
+    int **adjM;
 
     bool isValid(int u, int v)
     {
@@ -336,7 +337,7 @@ private:
         return false;
     }
 
-    void DFSUtils(int sv, bool*& flag)
+    void DFSUtils(int sv, bool *&flag)
     {
         flag[sv] = true;
         cout << sv << " ";
@@ -349,15 +350,15 @@ private:
         }
     }
 
-public:
+  public:
     GraphUsingAdjMatrix(int v = 5, bool f = false)
     {
         vertices = v;
         isDirected = f;
-        adjM = new int* [v];
+        adjM = new int *[v];
         for (int i = 0; i < v; i++)
         {
-            adjM[i] = new int[v] {0};
+            adjM[i] = new int[v]{0};
         }
     }
 
@@ -429,16 +430,16 @@ public:
     void DFS(int sv)
     {
         cout << "\nDFS Starting from the vertice " << sv << ": ";
-        bool* flag = new bool[vertices] {0};
+        bool *flag = new bool[vertices]{0};
         DFSUtils(sv, flag);
-        delete[]flag;
+        delete[] flag;
         cout << endl;
     }
 
     void BFS(int sv)
     {
         cout << "\nBFS Starting from the vertice " << sv << ": ";
-        bool* flag = new bool[vertices] {0};
+        bool *flag = new bool[vertices]{0};
         queue<int> q;
 
         q.push(sv);
@@ -460,26 +461,25 @@ public:
         }
 
         cout << endl;
-        delete[]flag;
+        delete[] flag;
     }
 
     ~GraphUsingAdjMatrix()
     {
         for (int i = 0; i < vertices; i++)
         {
-            delete[]adjM[i];
+            delete[] adjM[i];
         }
-        delete[]adjM;
+        delete[] adjM;
     }
-
 };
 
 class GraphUsingAdjList
 {
-private:
+  private:
     int vertices;
     bool isDirected;
-    LinkedList<int>* adjL;
+    LinkedList<int> *adjL;
 
     bool isValid(int u, int v)
     {
@@ -495,7 +495,7 @@ private:
         return false;
     }
 
-    void DFSUtils(int sv, bool*& flag)
+    void DFSUtils(int sv, bool *&flag)
     {
         flag[sv] = true;
         cout << sv << " ";
@@ -508,12 +508,12 @@ private:
         }
     }
 
-public:
+  public:
     GraphUsingAdjList(int v = 5, bool f = false)
     {
         vertices = v;
         isDirected = f;
-        adjL = new LinkedList<int> [v];
+        adjL = new LinkedList<int>[v];
     }
 
     void addEdge(int u, int v)
@@ -565,16 +565,16 @@ public:
     void DFS(int sv)
     {
         cout << "\nDFS Starting from the vertice " << sv << ": ";
-        bool* flag = new bool[vertices] {0};
+        bool *flag = new bool[vertices]{0};
         DFSUtils(sv, flag);
-        delete[]flag;
+        delete[] flag;
         cout << endl;
     }
 
     void BFS(int sv)
     {
         cout << "\nBFS Starting from the vertice " << sv << ": ";
-        bool* flag = new bool[vertices] {0};
+        bool *flag = new bool[vertices]{0};
         queue<int> q;
 
         q.push(sv);
@@ -596,14 +596,13 @@ public:
         }
 
         cout << endl;
-        delete[]flag;
+        delete[] flag;
     }
 
     ~GraphUsingAdjList()
     {
-        delete[]adjL;
+        delete[] adjL;
     }
-
 };
 
 int main()
@@ -617,7 +616,7 @@ int main()
 
     graph.displayPairWise();
     graph.displayAdjM();
-    
+
     graph.DFS(0);
     graph.BFS(0);
 
