@@ -1,0 +1,47 @@
+Part A
+
+AX 0000
+BX 0000
+CX 0012
+DX 0000
+SI 0000
+DI 0000
+BP 0000
+SP FFFE
+CS 19F5
+DS 19F5
+ES 19F5
+SS 19F5
+Flag 7202
+
+Part C
+
+Opcode for instruction mov ax, some constant is: B8
+
+Part E
+
+B80500 is an instruction code, it means to move a value in the AX register.        
+
+Part G
+
+Offset of first instruction: 0100
+
+Part H
+
+Size of ex01.com file: 18 Bytes
+
+Part I
+
+The value of IP is 0100, it points to the starting offset of next instruction. 
+
+Part J
+
+The IP was 0100 before, the first instruction took 3 bytes, so the IP updated the value of next instruction as 0103, likewise, the second instruction took 3 bytes again, and so the IP had the value 0106 after the second instruction
+
+
+Task 4
+
+The size of .com file is "47" in decimal and "2F" in hexadecimal
+
+
+
