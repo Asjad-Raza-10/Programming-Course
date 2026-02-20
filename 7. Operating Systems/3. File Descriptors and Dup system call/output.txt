@@ -1,0 +1,13 @@
+total 112
+-rwxrwxr-x 1 iuser iuser 15960 فروری  20 14:39 even
+-rw-rw-r-- 1 iuser iuser   139 فروری  20 14:39 even.c
+-rwxrwxr-x 1 iuser iuser 16360 فروری  20 15:06 file_process
+-rw-rw-r-- 1 iuser iuser   997 فروری  20 15:06 file_process.c
+-rw-rw-r-- 1 iuser iuser    44 فروری  20 15:06 file.txt
+-rw-r--r-- 1 iuser iuser   726 فروری  20 15:24 output.txt
+-rwxrwxr-x 1 iuser iuser 16128 فروری  20 14:52 parent
+-rw-rw-r-- 1 iuser iuser   478 فروری  20 14:52 parent.c
+-rwxrwxr-x 1 iuser iuser 16216 فروری  20 15:12 q3
+-rw-rw-r-- 1 iuser iuser  1220 فروری  20 15:13 q3.c
+-rwxrwxr-x 1 iuser iuser 16472 فروری  20 15:28 q4
+-rw-rw-r-- 1 iuser iuser  1070 فروری  20 15:28 q4.c
